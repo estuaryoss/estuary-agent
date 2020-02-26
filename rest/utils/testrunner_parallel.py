@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import platform
+import shlex
 from multiprocessing import Process, Manager
 
 from rest.utils.cmd_utils import CmdUtils
@@ -22,7 +23,7 @@ class TestRunnerParallel:
         start = datetime.datetime.now()
         dictionary['commands'][command.strip()]['startedat'] = str(start)
         if platform.system() == "Windows":
-            details = self.__cmd_utils.run_cmd_shell_true(command.split())
+            details = self.__cmd_utils.run_cmd_shell_true(shlex.split(command.strip()))
         else:
             details = self.__cmd_utils.run_cmd_shell_true([command.strip()])
         dictionary['commands'][command.strip()]['status'] = status_finished

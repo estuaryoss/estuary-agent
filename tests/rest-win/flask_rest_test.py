@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import platform
+import shlex
 import time
 import unittest
 import zipfile
@@ -8,7 +9,6 @@ import requests
 import yaml
 from flask import json
 from parameterized import parameterized
-from requests_toolbelt.utils import dump
 
 from tests.rest.constants import Constants
 from tests.rest.error_codes import ErrorCodes
@@ -710,6 +710,23 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('message').get('duration'), a + b - 2)
         self.assertEqual(body.get('message').get('commands').get(commands[0]).get('duration'), a - 1)
         self.assertEqual(body.get('message').get('commands').get(commands[1]).get('duration'), b - 1)
+        self.assertIsNotNone(body.get('time'))
+
+    def test_executecommand_arg_with_spaces(self):
+        raw_cmd = "java -cp whatever.jar com.java.org -cmd my_cmd -args \"a;b c d;e\""
+        shlex_cmd = shlex.split(raw_cmd)
+
+        response = requests.post(self.server + f"/command", data=raw_cmd)
+        body = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description'),
+                         ErrorCodes.HTTP_CODE.get(Constants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), Constants.SUCCESS)
+        self.assertEqual(len(body.get('message').get('commands').get(raw_cmd).get('details').get('args')),
+                         len(shlex_cmd))
+        self.assertEqual(body.get('message').get('commands').get(raw_cmd).get('details').get('args')[-1], shlex_cmd[-1])
         self.assertIsNotNone(body.get('time'))
 
     def test_executetest_sum_seq_p(self):

@@ -1,6 +1,7 @@
 import datetime
 import os
 import platform
+import shlex
 
 from rest.api.definitions import test_info_init
 from rest.utils.cmd_utils import CmdUtils
@@ -32,7 +33,7 @@ class TestRunnerInMemory:
             command_dict['commands'][command.strip()]['startedat'] = str(start)
             try:
                 if platform.system() == "Windows":
-                    details[command.strip()] = self.__cmd_utils.run_cmd_shell_true(command.split())
+                    details[command.strip()] = self.__cmd_utils.run_cmd_shell_true(shlex.split(command.strip()))
                 else:
                     details[command.strip()] = self.__cmd_utils.run_cmd_shell_true([command.strip()])
             except Exception as e:

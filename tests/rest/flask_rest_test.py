@@ -796,5 +796,21 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('code'), Constants.SET_ENV_VAR_FAILURE)
         self.assertIsNotNone(body.get('time'))
 
-        if __name__ == '__main__':
-            unittest.main()
+    def test_executecommand_arg_with_spaces(self):
+        raw_cmd = "java -cp whatever.jar com.java.org -cmd my_cmd -args \"a;b c d;e\""
+
+        response = requests.post(self.server + f"/command", data=raw_cmd)
+        body = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description'),
+                         ErrorCodes.HTTP_CODE.get(Constants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), Constants.SUCCESS)
+        self.assertEqual(len(body.get('message').get('commands').get(raw_cmd).get('details').get('args')), 1)
+        self.assertEqual(body.get('message').get('commands').get(raw_cmd).get('details').get('args')[0], raw_cmd)
+        self.assertIsNotNone(body.get('time'))
+
+
+if __name__ == '__main__':
+    unittest.main()
