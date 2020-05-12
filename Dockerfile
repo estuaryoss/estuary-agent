@@ -1,19 +1,14 @@
-FROM alpine:3.10
+FROM alpine:3.11
 
-RUN apk add --no-cache python
-
-RUN apk add --no-cache \
-  build-base \
-  sshpass
+RUN apk add --no-cache python3 && \
+    pip3 install --upgrade pip==20.1 setuptools==46.2.0 --no-cache
 
 RUN apk add --no-cache \
     bash \
-    py-pip \
     maven \
     openjdk8 \
     nodejs \
     npm
-
 
 RUN apk add --no-cache \
     python3-dev \
@@ -23,9 +18,6 @@ RUN apk add --no-cache \
     libc-dev \
     make
 
-RUN apk add --no-cache python3 && \
-    pip3 install --upgrade pip==20.0.2 setuptools==42.0.2 --no-cache
-
 ## Cleanup
 RUN rm -rf /var/cache/apk/*
 
@@ -33,8 +25,8 @@ RUN rm -rf /var/cache/apk/*
 RUN mkdir /data/
 
 ## Expose some volumes
-ENV WORKSPACE /home/dev/scripts/inputs
-ENV SCRIPTS_DIR /home/dev/scripts
+ENV SCRIPTS_DIR /scripts
+ENV WORKSPACE $SCRIPTS_DIR/inputs
 
 VOLUME ["$WORKSPACE/templates"]
 VOLUME ["$WORKSPACE/variables"]
@@ -62,4 +54,4 @@ WORKDIR $SCRIPTS_DIR
 
 RUN pip3 install -r $SCRIPTS_DIR/requirements.txt
 
-CMD ["python3", "/home/dev/scripts/main_flask.py"]
+CMD ["python3", "/scripts/main_flask.py"]

@@ -10,6 +10,5 @@ py_eureka_client
 flask_cors
 fluent-logger
 Jinja2
-jinja2-cli
 psutil
 pyinstaller

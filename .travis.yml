@@ -40,13 +40,13 @@ jobs:
         - docker run
           -d
           -p 8080:8080
-          -v $PWD/inputs/templates:/home/dev/scripts/inputs/templates
-          -v $PWD/inputs/variables:/home/dev/scripts/inputs/variables
+          -v $PWD/inputs/templates:/scripts/inputs/templates
+          -v $PWD/inputs/variables:/scripts/inputs/variables
           --name estuary-testrunner
           dinutac/estuary-testrunner:latest
       script:
-        - docker exec estuary-testrunner python3 -m unittest discover /home/dev/scripts/tests/rest *_test.py
-        - docker exec estuary-testrunner python3 -m unittest discover /home/dev/scripts/tests/rest "render_test.py"
+        - docker exec estuary-testrunner python3 -m unittest discover /scripts/tests/rest *_test.py
+        - docker exec estuary-testrunner python3 -m unittest discover /scripts/tests/rest "render_test.py"
 
       #run executable tests. exec with pyinstaller
     - language: python
@@ -96,8 +96,8 @@ jobs:
         - docker run
           -d
           -p 8080:8080
-          -v $PWD/inputs/templates:/home/dev/scripts/inputs/templates
-          -v $PWD/inputs/variables:/home/dev/scripts/inputs/variables
+          -v $PWD/inputs/templates:/scripts/inputs/templates
+          -v $PWD/inputs/variables:/scripts/inputs/variables
           --name estuary-testrunner
           dinutac/estuary-testrunner:latest
         - sleep 5
@@ -111,23 +111,16 @@ jobs:
       services: docker
       env:
         ISOLATED: true
-        DOCKER_SCRIPTS_DIR: /home/dev/scripts
+        DOCKER_SCRIPTS_DIR: /scripts
       before_script:
         - docker build -t dinutac/estuary-testrunner:latest -f Dockerfile .
       script:
         #check template render
         - docker run -i
-          -v $TRAVIS_BUILD_DIR/inputs/templates:/home/dev/scripts/inputs/templates
-          -v $TRAVIS_BUILD_DIR/inputs/variables:/home/dev/scripts/inputs/variables  -e TEMPLATE=standalone.yml
+          -v $TRAVIS_BUILD_DIR/inputs/templates:/scripts/inputs/templates
+          -v $TRAVIS_BUILD_DIR/inputs/variables:/scripts/inputs/variables  -e TEMPLATE=standalone.yml
           -e VARIABLES=variables.yml -e DATABASE=mysql56 -e IMAGE=latest --entrypoint python3 dinutac/estuary-testrunner:latest
-          $DOCKER_SCRIPTS_DIR/main.py
-
-        #check template render
-        - docker run --entrypoint jinja2
-          -v $TRAVIS_BUILD_DIR/inputs/templates:/home/dev/scripts/inputs/templates
-          -v $TRAVIS_BUILD_DIR/inputs/variables:/home/dev/scripts/inputs/variables
-          dinutac/estuary-testrunner:latest
-          /home/dev/scripts/inputs/templates/json.j2 /home/dev/scripts/inputs/variables/json.json --format=json
+          $DOCKER_SCRIPTS_DIR/entities/render.py
 
     - language: python
       python: 3.6
@@ -135,7 +128,7 @@ jobs:
         - docker
       env:
         SCRIPTS_DIR: tests
-        DOCKER_SCRIPTS_DIR: /home/dev/scripts
+        DOCKER_SCRIPTS_DIR: /scripts
         ISOLATED: true
       before_script:
         - docker build -t dinutac/estuary-testrunner:latest -f Dockerfile .

@@ -6,7 +6,7 @@ services:
     image: dinutac/estuary-testrunner:latest
     hostname: estuary-testrunner
 #    entrypoint: tail -f /etc/alpine-release
-    command: bash -c "/home/dev/scripts/wait-for-it.sh -t 20 eureka-server:8080 -- echo \"eureka running\" && sleep 20 && python3 /home/dev/scripts/main_flask.py"
+    command: bash -c "/scripts/wait-for-it.sh -t 20 eureka-server:8080 -- echo \"eureka running\" && sleep 20 && python3 /scripts/main_flask.py"
     environment:
 #      FLUENTD_IP_PORT: '192.168.100.12:24224'
       EUREKA_SERVER: http://eureka-server:8080/eureka/v2 #your eureka server
@@ -14,7 +14,7 @@ services:
     volumes:
       - ./inputs/templates:/data
       - ./inputs/variables:/variables
-    #      - ./:/home/dev/scripts/
+    #      - ./:/scripts/
     #      - ./tmp:/tmp
     ports:
       - "8080:8080"
