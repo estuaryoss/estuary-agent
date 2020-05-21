@@ -1,7 +1,7 @@
 FROM alpine:3.11
 
 RUN apk add --no-cache python3 && \
-    pip3 install --upgrade pip==20.1 setuptools==46.2.0 --no-cache
+    pip3 install --upgrade pip==20.1.1 setuptools==46.2.0 --no-cache
 
 RUN apk add --no-cache \
     bash \
@@ -53,5 +53,6 @@ RUN chmod +x $SCRIPTS_DIR/*.sh
 WORKDIR $SCRIPTS_DIR
 
 RUN pip3 install -r $SCRIPTS_DIR/requirements.txt
+RUN pip3 install uwsgi
 
-CMD ["python3", "/scripts/main_flask.py"]
+CMD ["uwsgi", "/scripts/flaskconfig.ini"]
