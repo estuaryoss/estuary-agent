@@ -20,7 +20,7 @@ class FlaskServerTestCase(unittest.TestCase):
     # server = "http://192.168.100.47:8080"
     # server = "http://" + os.environ.get('SERVER')
 
-    expected_version = "4.0.2"
+    expected_version = "4.0.3"
 
     def setUp(self):
         requests.delete(self.server + "/test")
@@ -283,9 +283,9 @@ class FlaskServerTestCase(unittest.TestCase):
         body = response.json()
         self.assertEqual(response.status_code, 404)
         self.assertEqual(body.get('description'),
-                         ErrorCodes.HTTP_CODE.get(Constants.GET_FILE_FAILURE))
+                         ErrorCodes.HTTP_CODE.get(Constants.FOLDER_ZIP_FAILURE) % container_folder)
         self.assertEqual(body.get('version'), self.expected_version)
-        self.assertEqual(body.get('code'), Constants.GET_FILE_FAILURE)
+        self.assertEqual(body.get('code'), Constants.FOLDER_ZIP_FAILURE)
         self.assertIsNotNone(body.get('time'))
 
     def test_getfolder_folder_param_missing_n(self):

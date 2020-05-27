@@ -10,37 +10,14 @@ class FluentdUtils:
     def __init__(self, logger):
         self.logger = logger
 
-    def debug(self, tag, msg):
-        message = self.log("DEBUG", msg)
-        response = self.emit(tag, message)
+    def emit(self, tag, msg, level="DEBUG"):
+        message = self.__enrichlog(level, msg)
+        response = self.__send(tag, message)
         return {"emit": response,
                 "message": message}
 
-    def info(self, tag, msg):
-        message = self.log("INFO", msg)
-        response = self.emit(tag, message)
-        return {"emit": response,
-                "message": message}
-
-    def warn(self, tag, msg):
-        message = self.log("WARN", msg)
-        response = self.emit(tag, message)
-        return {"emit": response,
-                "message": message}
-
-    def error(self, tag, msg):
-        message = self.log("ERROR", msg)
-        response = self.emit(tag, message)
-        return {"emit": response,
-                "message": message}
-
-    def fatal(self, tag, msg):
-        message = self.log("FATAL", msg)
-        response = self.emit(tag, message)
-        return {"emit": response,
-                "message": message}
-
-    def log(self, level_code, msg):
+    @staticmethod
+    def __enrichlog(level_code, msg):
         return {
             "name": properties.get('name'),
             "port": os.environ.get('PORT') if os.environ.get('PORT') else properties.get('port'),
@@ -53,7 +30,7 @@ class FluentdUtils:
             "timestamp": str(datetime.datetime.now()),
         }
 
-    def emit(self, tag, msg):
+    def __send(self, tag, msg):
         if os.environ.get('FLUENTD_IP_PORT'):
             return str(self.logger.emit(tag, msg)).lower()
 

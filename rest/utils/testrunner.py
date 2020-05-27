@@ -11,49 +11,52 @@ from rest.utils.io_utils import IOUtils
 class TestRunner:
 
     def __init__(self):
+        self.command_dict = test_info_init
         self.__cmd_utils = CmdUtils()
         self.__io_utils = IOUtils()
 
     def run_commands(self, json_file, test_id, commands):
         start_total = datetime.datetime.now()
+        commands = list(map(lambda item: item.strip(), commands))
 
+        self.command_dict['id'] = test_id
+        self.command_dict['pid'] = os.getpid()
+        input_data_dict = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
+        self.command_dict["started"] = "true"
+        self.command_dict["commands"] = input_data_dict
+        self.command_dict["startedat"] = str(datetime.datetime.now())
+
+        self.__run_commands(commands, json_file=json_file)
+
+        self.command_dict['finished'] = "true"
+        self.command_dict['started'] = "false"
+        end_total = datetime.datetime.now()
+        self.command_dict['finishedat'] = str(end_total)
+        self.command_dict['duration'] = round((end_total - start_total).total_seconds())
+        self.__io_utils.write_to_file_dict(json_file, self.command_dict)
+
+        return self.command_dict
+
+    def __run_commands(self, commands, json_file):
+        details = {}
         status_finished = "finished"
         status_in_progress = "in progress"
-        command_dict = test_info_init
-
-        command_dict['id'] = test_id
-        command_dict['pid'] = os.getpid()
-        input_data_dict = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
-        command_dict["started"] = "true"
-        command_dict["commands"] = input_data_dict
-        command_dict["startedat"] = str(datetime.datetime.now())
-
-        details = {}
         for command in commands:
             start = datetime.datetime.now()
-            command_dict['commands'][command.strip()] = {"status": "scheduled", "details": {}}
-            command_dict['commands'][command.strip()]['status'] = status_in_progress
-            command_dict['commands'][command.strip()]['startedat'] = str(start)
-            self.__io_utils.write_to_file_dict(json_file, command_dict)
+            self.command_dict['commands'][command] = {"status": "scheduled", "details": {}}
+            self.command_dict['commands'][command]['status'] = status_in_progress
+            self.command_dict['commands'][command]['startedat'] = str(start)
+            self.__io_utils.write_to_file_dict(json_file, self.command_dict)
             try:
                 if platform.system() == "Windows":
-                    details[command.strip()] = self.__cmd_utils.run_cmd_shell_true(shlex.split(command.strip()))
+                    details[command] = self.__cmd_utils.run_cmd_shell_true(shlex.split(command))
                 else:
-                    details[command.strip()] = self.__cmd_utils.run_cmd_shell_true([command.strip()])
+                    details[command] = self.__cmd_utils.run_cmd_shell_true([command])
             except Exception as e:
-                details[command.strip()] = "Exception({0})".format(e.__str__())
-            command_dict['commands'][command.strip()]['status'] = status_finished
+                details[command] = "Exception({0})".format(e.__str__())
+            self.command_dict['commands'][command]['status'] = status_finished
             end = datetime.datetime.now()
-            command_dict['commands'][command.strip()]['finishedat'] = str(end)
-            command_dict['commands'][command.strip()]['duration'] = round((end - start).total_seconds())
-            command_dict['commands'][command.strip()]['details'] = details[command.strip()]
-            self.__io_utils.write_to_file_dict(json_file, command_dict)
-
-        command_dict['finished'] = "true"
-        command_dict['started'] = "false"
-        end_total = datetime.datetime.now()
-        command_dict['finishedat'] = str(end_total)
-        command_dict['duration'] = round((end_total - start_total).total_seconds())
-        self.__io_utils.write_to_file_dict(json_file, command_dict)
-
-        return command_dict
+            self.command_dict['commands'][command]['finishedat'] = str(end)
+            self.command_dict['commands'][command]['duration'] = round((end - start).total_seconds())
+            self.command_dict['commands'][command]['details'] = details[command]
+            self.__io_utils.write_to_file_dict(json_file, self.command_dict)

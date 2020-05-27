@@ -9,5 +9,5 @@ class ProcessUtils:
         self.message_dumper = MessageDumper()
 
     def on_terminate(self, proc):
-        self.fluentd_utils.debug(tag="api", msg=self.message_dumper.dump_message(
+        self.fluentd_utils.emit(tag="api", msg=self.message_dumper.dump_message(
             {"proc": str(proc), "returncode": proc.returncode}))

@@ -40,6 +40,6 @@ if __name__ == "__main__":
     app.logger.debug({"msg": environ_dump})
     app.logger.debug({"msg": ip_port_dump})
 
-    fluentd_utils.debug(fluentd_tag, environ_dump)
+    fluentd_utils.emit(tag=fluentd_tag, msg=environ_dump)
 
     app.run(host=host, port=port)

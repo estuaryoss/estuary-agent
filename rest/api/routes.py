@@ -20,8 +20,9 @@ from rest.api.apiresponsehelpers.error_codes import ErrorCodes
 from rest.api.apiresponsehelpers.http_response import HttpResponse
 from rest.api.constants.api_code_constants import ApiCodeConstants
 from rest.api.constants.env_constants import EnvConstants
-from rest.api.definitions import test_info_init, swagger_file_content, unmodifiable_env_vars
+from rest.api.definitions import test_info_init, unmodifiable_env_vars
 from rest.api.logginghelpers.message_dumper import MessageDumper
+from rest.api.swagger import swagger_file_content
 from rest.utils.cmd_utils import CmdUtils
 from rest.utils.fluentd_utils import FluentdUtils
 from rest.utils.io_utils import IOUtils
@@ -47,7 +48,7 @@ def before_request():
                               request.headers.get('X-Request-ID') if request.headers.get('X-Request-ID') else ctx.g.xid)
     message_dumper.set_header("Request-Uri", request_uri)
 
-    response = fluentd_utils.debug(tag="api", msg=message_dumper.dump(request=request))
+    response = fluentd_utils.emit(tag="api", msg=message_dumper.dump(request=request))
     app.logger.debug(response)
     if not str(request.headers.get("Token")) == str(os.environ.get("HTTP_AUTH_TOKEN")):
         if not ("/api/docs" in request_uri or "/swagger/swagger.yml" in request_uri):  # exclude swagger
@@ -71,7 +72,7 @@ def after_request(http_response):
     except:
         app.logger.debug("Message was not altered: " + message_dumper.dump(http_response))
 
-    response = fluentd_utils.debug(tag="api", msg=message_dumper.dump(http_response))
+    response = fluentd_utils.emit(tag="api", msg=message_dumper.dump(http_response))
     app.logger.debug(response)
 
     return http_response
@@ -128,7 +129,7 @@ def get_content_with_env(template, variables):
         response = Response(r.rend_template(), 200, mimetype="text/plain")
         # response = http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), result), 200
     except Exception as e:
-        result = "Exception({0})".format(e.__str__())
+        result = "Exception({})".format(e.__str__())
         response = Response(json.dumps(http.failure(ApiCodeConstants.JINJA2_RENDER_FAILURE,
                                                     ErrorCodes.HTTP_CODE.get(ApiCodeConstants.JINJA2_RENDER_FAILURE),
                                                     result,
@@ -152,7 +153,7 @@ def get_test_info():
         test_env_vars["processes"] = [p.info for p in psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
     except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
+        exception = "Exception({})".format(e.__str__())
         return Response(json.dumps(http.failure(ApiCodeConstants.GET_CONTAINER_TEST_INFO_FAILURE,
                                                 ErrorCodes.HTTP_CODE.get(
                                                     ApiCodeConstants.GET_CONTAINER_TEST_INFO_FAILURE),
@@ -185,7 +186,7 @@ def set_env():
             if key not in unmodifiable_env_vars:
                 os.environ[key] = value
     except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
+        exception = "Exception({})".format(e.__str__())
         return Response(json.dumps(http.failure(ApiCodeConstants.SET_ENV_VAR_FAILURE,
                                                 ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SET_ENV_VAR_FAILURE) % str(
                                                     input_data),
@@ -208,7 +209,7 @@ def get_env(name):
                          os.environ[name])), 200,
             mimetype="application/json")
     except Exception as e:
-        result = "Exception({0})".format(e.__str__())
+        result = "Exception({})".format(e.__str__())
         response = Response(json.dumps(http.failure(ApiCodeConstants.GET_CONTAINER_ENV_VAR_FAILURE,
                                                     ErrorCodes.HTTP_CODE.get(
                                                         ApiCodeConstants.GET_CONTAINER_ENV_VAR_FAILURE) % name,
@@ -240,21 +241,13 @@ def test_start(test_id):
         input_data_list = list(map(lambda x: x.strip(), input_data_list))
         test_info_init["id"] = test_id
         io_utils.write_to_file_dict(EnvConstants.TEST_INFO_PATH, test_info_init)
-    except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.TEST_START_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_START_FAILURE) % test_id,
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
-
-    try:
         os.chmod(start_py_path, stat.S_IRWXU)
         input_data_list.insert(0, test_id)
         input_data_list.insert(0, start_py_path)
         # input_data_list.insert(0, "python")
         cmd_utils.run_cmd_detached(input_data_list)
     except Exception as e:
-        result = "Exception({0})".format(e.__str__())
+        result = "Exception({})".format(e.__str__())
         return Response(json.dumps(http.failure(ApiCodeConstants.TEST_START_FAILURE,
                                                 ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_START_FAILURE) % test_id,
                                                 result,
@@ -288,16 +281,9 @@ def upload_file():
                                                     ErrorCodes.HTTP_CODE.get(
                                                         ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                     str(traceback.format_exc()))), 404, mimetype="application/json")
-    except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE),
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
-    try:
         io_utils.write_to_file_binary(file_path, file_content)
     except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
+        exception = "Exception({})".format(e.__str__())
         return Response(json.dumps(http.failure(ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE,
                                                 ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE),
                                                 exception,
@@ -327,7 +313,7 @@ def get_file():
     try:
         response = io_utils.read_file_byte_array(file_path), 200
     except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
+        exception = "Exception({})".format(e.__str__())
         response = Response(json.dumps(http.failure(ApiCodeConstants.GET_FILE_FAILURE,
                                                     ErrorCodes.HTTP_CODE.get(
                                                         ApiCodeConstants.GET_FILE_FAILURE),
@@ -354,15 +340,8 @@ def get_results_folder():
 
     try:
         io_utils.zip_file(archive_name, folder_path)
-    except FileNotFoundError as e:
-        result = "Exception({0})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.GET_FILE_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.GET_FILE_FAILURE),
-                                                result,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
-    except:
-        result = "Exception({0})".format(sys.exc_info()[0])
+    except Exception as e:
+        result = "Exception({})".format(e.__str__())
         return Response(json.dumps(http.failure(ApiCodeConstants.FOLDER_ZIP_FAILURE,
                                                 ErrorCodes.HTTP_CODE.get(
                                                     ApiCodeConstants.FOLDER_ZIP_FAILURE) % folder_path,
@@ -380,7 +359,7 @@ def test_stop():
     process_utils = ProcessUtils(logger)
     http = HttpResponse()
     variables = "testinfo.json"
-    id = json.loads(io_utils.read_file(os.environ.get('VARS_DIR') + f"/{variables}"))["id"]
+    test_id = json.loads(io_utils.read_file(os.environ.get('VARS_DIR') + f"/{variables}"))["id"]
 
     try:
         response = get_test_info()
@@ -398,18 +377,17 @@ def test_stop():
     except:
         exception = "Exception({0})".format(sys.exc_info()[0])
         return Response(json.dumps(http.failure(ApiCodeConstants.TEST_STOP_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_STOP_FAILURE) % id,
+                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_STOP_FAILURE) % test_id,
                                                 exception,
                                                 str(traceback.format_exc()))), 404, mimetype="application/json")
 
     return Response(
-        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), id)), 200,
+        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_id)), 200,
         mimetype="application/json")
 
 
 @app.route('/command', methods=['POST', 'PUT'])
 def execute_command():
-    test_id = "none"
     variables = "commandinfo.json"
     os.environ['TEMPLATE'] = "start.py"
     os.environ['VARIABLES'] = variables
@@ -426,16 +404,8 @@ def execute_command():
         input_data_list = io_utils.get_filtered_list_regex(input_data.split("\n"),
                                                            re.compile(r'(\s+|[^a-z]|^)rm\s+.*$'))
         input_data_list = list(map(lambda x: x.strip(), input_data_list))
-    except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.TEST_START_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_START_FAILURE) % test_id,
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
-
-    try:
-        testrunner = TestRunnerInMemory()
-        response = testrunner.run_commands(input_data_list)
+        test_runner = TestRunnerInMemory()
+        response = test_runner.run_commands(input_data_list)
     except Exception as e:
         exception = "Exception({0})".format(e.__str__())
         return Response(json.dumps(http.failure(ApiCodeConstants.COMMAND_EXEC_FAILURE,
