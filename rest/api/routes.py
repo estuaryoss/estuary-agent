@@ -54,7 +54,7 @@ def before_request():
 
     response = fluentd_utils.emit(tag="api", msg=message_dumper.dump(request=request))
     app.logger.debug(response)
-    if not str(request.headers.get("Token")) == str(os.environ.get("HTTP_AUTH_TOKEN")):
+    if not str(request.headers.get("Token")) == str(EnvStartup.get_instance().get("http_auth_token")):
         if not ("/api/docs" in request_uri or "/swagger/swagger.yml" in request_uri):  # exclude swagger
             headers = {
                 'X-Request-ID': message_dumper.get_header("X-Request-ID")
