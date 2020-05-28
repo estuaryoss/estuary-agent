@@ -55,4 +55,4 @@ WORKDIR $SCRIPTS_DIR
 RUN pip3 install -r $SCRIPTS_DIR/requirements.txt
 RUN pip3 install uwsgi
 
-CMD ["uwsgi", "/scripts/flaskconfig.ini"]
+CMD ["/scripts/main_flask.py"]

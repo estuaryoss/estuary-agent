@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
-
 import os
 from pathlib import Path
 
-from about import properties
+from rest.api import EurekaRegistrator
 from rest.api.constants.env_constants import EnvConstants
 from rest.api.definitions import test_info_init
 from rest.api.logginghelpers.message_dumper import MessageDumper
 from rest.api.routes import app
 from rest.api.routes import fluentd_utils
+from rest.utils.env_startup import EnvStartup
 from rest.utils.io_utils import IOUtils
 
 if __name__ == "__main__":
-    port = properties["port"]
     host = '0.0.0.0'
+    port = EnvStartup.get_instance().get("port")
     fluentd_tag = "startup"
     variables = "testinfo.json"
-
     message_dumper = MessageDumper()
     io_utils = IOUtils()
 
-    if os.environ.get('PORT'):
-        port = int(os.environ.get("PORT"))  # override port  if set from env
+    if EnvStartup.get_instance().get("eureka_server"):
+        EurekaRegistrator(EnvStartup.get_instance().get("eureka_server")).register_app(
+            EnvStartup.get_instance().get("app_ip_port"))
 
     io_utils.create_dir(Path(EnvConstants.TEMPLATES_PATH))
     io_utils.create_dir(Path(EnvConstants.VARIABLES_PATH))
@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     app.logger.debug({"msg": environ_dump})
     app.logger.debug({"msg": ip_port_dump})
+    app.logger.debug({"msg": EnvStartup.get_instance()})
 
     fluentd_utils.emit(tag=fluentd_tag, msg=environ_dump)
 

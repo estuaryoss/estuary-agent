@@ -69,16 +69,16 @@ Start Eureka server with docker:
 
     docker run -p 8080:8080 netflixoss/eureka:1.3.1
     or
-    docker run -p 8080:8080 dinutac/netflixoss-eureka:1.9.15
+    docker run -p 8080:8080 dinutac/netflixoss-eureka:1.9.21
 
 Start your containers by specifying the full hostname or ip of the host machine on where your testrunner service resides.
 Optionally you can define the WORKSPACE (default=/tmp)or PORT (default=8080).
 
     docker run \
-    -e EUREKA_SERVER=http://10.10.15.28:8080/eureka/v2 -> the eureka server
+    -e EUREKA_SERVER=http://10.10.15.30:8080/eureka/v2 -> the eureka server
     -e APP_IP_PORT=10.10.15.28:8081 -> the ip and port of the app
     -e WORKSPACE=/tmp/ -> optional;for multiplatform set it to your needs;default is /tmp/;E.g /workspace/
-    -p 8080:8080
+    -p 8081:8080
     dinutac/estuary-testrunner:<tag>
 
 ### Fluentd logging

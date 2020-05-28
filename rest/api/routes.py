@@ -24,14 +24,18 @@ from rest.api.definitions import test_info_init, unmodifiable_env_vars
 from rest.api.logginghelpers.message_dumper import MessageDumper
 from rest.api.swagger import swagger_file_content
 from rest.utils.cmd_utils import CmdUtils
+from rest.utils.env_startup import EnvStartup
 from rest.utils.fluentd_utils import FluentdUtils
 from rest.utils.io_utils import IOUtils
 from rest.utils.process_utils import ProcessUtils
 from rest.utils.testrunner_in_memory import TestRunnerInMemory
 
 app = create_app()
-logger = sender.FluentSender(properties.get('name'), host=properties["fluentd_ip"],
-                             port=int(properties["fluentd_port"]))
+logger = \
+    sender.FluentSender(tag=properties.get('name'),
+                        host=EnvStartup.get_instance().get("fluentd_ip_port").split(":")[0],
+                        port=int(EnvStartup.get_instance().get("fluentd_ip_port").split(":")[1])) \
+        if EnvStartup.get_instance().get("fluentd_ip_port") else None
 fluentd_utils = FluentdUtils(logger)
 message_dumper = MessageDumper()
 
@@ -382,7 +386,8 @@ def test_stop():
                                                 str(traceback.format_exc()))), 404, mimetype="application/json")
 
     return Response(
-        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_id)), 200,
+        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_id)),
+        200,
         mimetype="application/json")
 
 

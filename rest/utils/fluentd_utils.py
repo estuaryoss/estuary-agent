@@ -3,6 +3,7 @@ import os
 import platform
 
 from about import properties
+from rest.utils.env_startup import EnvStartup
 
 
 class FluentdUtils:
@@ -31,7 +32,7 @@ class FluentdUtils:
         }
 
     def __send(self, tag, msg):
-        if os.environ.get('FLUENTD_IP_PORT'):
+        if EnvStartup.get_instance().get("fluentd_ip_port"):
             return str(self.logger.emit(tag, msg)).lower()
 
         return "fluentd logging not enabled"
