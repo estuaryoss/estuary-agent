@@ -37,6 +37,8 @@ paths:
       responses:
         200:
           description: List of the entire environment variables
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
     post:
       tags:
         - estuary-testrunner
@@ -57,8 +59,12 @@ paths:
       responses:
         200:
           description: Set environment variables success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: Set environment variables failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /env/{env_name}:
     get:
       tags:
@@ -79,8 +85,12 @@ paths:
       responses:
         200:
           description: Get env var success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: Get env var failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /ping:
     get:
       tags:
@@ -96,6 +106,8 @@ paths:
       responses:
         200:
           description: Ping endpoint which replies with pong. Useful when checking the alive status of the service
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
   /about:
     get:
       tags:
@@ -111,6 +123,8 @@ paths:
       responses:
         200:
           description: Prints the name and version of the application.
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
   /render/{template}/{variables}:
     get:
       tags:
@@ -138,8 +152,12 @@ paths:
       responses:
         200:
           description: jinja2 templating success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: jinja2 templating failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
     post:
       tags:
         - estuary-testrunner
@@ -174,8 +192,12 @@ paths:
       responses:
         200:
           description: jinja2 templating success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: jinja2 templating failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /test/{id}:
     post:
       tags:
@@ -204,8 +226,12 @@ paths:
       responses:
         200:
           description: commands start success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: commands start failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /test:
     get:
       tags:
@@ -221,8 +247,12 @@ paths:
       responses:
         200:
           description: Get test info success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: Get test info failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
     delete:
       tags:
         - estuary-testrunner
@@ -237,8 +267,12 @@ paths:
       responses:
         200:
           description: test stop success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: test stop failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /file:
     put:
       tags:
@@ -267,8 +301,12 @@ paths:
       responses:
         200:
           description: The content of the file was uploaded successfully
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: Failure, the file content could not be uploaded
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
     get:
       tags:
         - estuary-testrunner
@@ -291,8 +329,12 @@ paths:
       responses:
         200:
           description: The content of the file in plain text, success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: Failure, the file content could not be read
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /folder:
     get:
       tags:
@@ -316,8 +358,12 @@ paths:
       responses:
         200:
           description: The content of the folder as zip archive
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: The content of the folder could not be obtained
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
   /command:
     post:
       tags:
@@ -341,9 +387,47 @@ paths:
       responses:
         200:
           description: commands start success
+          schema:
+            $ref: "#/definitions/ApiResponseSuccess"
         404:
           description: commands start failure
+          schema:
+            $ref: "#/definitions/ApiResponseFailure"
 definitions:
+    ApiResponseSuccess:
+      type: object
+      properties:
+        message:
+          type: object
+        description:
+          type: "string"
+        code:
+          type: "string"
+        time:
+          type: "string"
+          format: "date-time"
+        name:
+          type: "string"
+        version:
+          type: "string"
+    ApiResponseFailure:
+      type: object
+      properties:
+        message:
+          type: "string"
+        description:
+          type: "string"
+        code:
+          type: "string"
+        stacktrace:
+          type: "string"
+        time:
+          type: "string"
+          format: "date-time"
+        name:
+          type: "string"
+        version:
+          type: "string"
     envvar:
       type: object
       example: |

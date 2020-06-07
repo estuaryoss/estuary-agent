@@ -37,7 +37,11 @@ jobs:
       - run:
           command: python -m unittest discover tests/rest-win "*_test.py"
           name: "run integration tests"
-
+      - store_artifacts:
+          path: main-win.exe
+      - store_artifacts:
+          path: start.py
+          destination: start.py-win
 workflows:
   main:
     jobs:
