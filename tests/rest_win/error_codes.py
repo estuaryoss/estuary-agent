@@ -1,4 +1,4 @@
-from tests.rest.api_code_constants import ApiCodeConstants
+from tests.rest_win.api_code_constants import ApiCodeConstants
 
 
 class ErrorCodes:

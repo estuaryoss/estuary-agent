@@ -3,7 +3,7 @@ swagger_file_content = '''
 info:
   description: |
     Estuary testrunner which will run your commands and tests
-  version: "4.0.2"
+  version: "4.0.4"
   title: estuary-testrunner
   termsOfService: http://swagger.io/terms/
   contact:
@@ -38,7 +38,7 @@ paths:
         200:
           description: List of the entire environment variables
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
     post:
       tags:
         - estuary-testrunner
@@ -58,13 +58,13 @@ paths:
           $ref: '#/definitions/envvar'
       responses:
         200:
-          description: Set environment variables success
+          description: Set environment variables response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: Set environment variables failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /env/{env_name}:
     get:
       tags:
@@ -84,13 +84,13 @@ paths:
         type: string
       responses:
         200:
-          description: Get env var success
+          description: Get env var response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: Get env var failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /ping:
     get:
       tags:
@@ -107,7 +107,7 @@ paths:
         200:
           description: Ping endpoint which replies with pong. Useful when checking the alive status of the service
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
   /about:
     get:
       tags:
@@ -124,7 +124,7 @@ paths:
         200:
           description: Prints the name and version of the application.
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
   /render/{template}/{variables}:
     get:
       tags:
@@ -151,13 +151,13 @@ paths:
         type: string
       responses:
         200:
-          description: jinja2 templating success
+          description: jinja2 templating response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: jinja2 templating failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
     post:
       tags:
         - estuary-testrunner
@@ -191,13 +191,13 @@ paths:
           $ref: '#/definitions/envvar'
       responses:
         200:
-          description: jinja2 templating success
+          description: jinja2 templating response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: jinja2 templating failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /test/{id}:
     post:
       tags:
@@ -225,13 +225,13 @@ paths:
           $ref: '#/definitions/test_file_content'
       responses:
         200:
-          description: commands start success
+          description: commands start response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: commands start failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /test:
     get:
       tags:
@@ -246,13 +246,13 @@ paths:
         required: false
       responses:
         200:
-          description: Get test info success
+          description: Get test info response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: Get test info failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
     delete:
       tags:
         - estuary-testrunner
@@ -266,13 +266,13 @@ paths:
         required: false
       responses:
         200:
-          description: test stop success
+          description: test stop response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: test stop failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /file:
     put:
       tags:
@@ -302,11 +302,11 @@ paths:
         200:
           description: The content of the file was uploaded successfully
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: Failure, the file content could not be uploaded
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
     get:
       tags:
         - estuary-testrunner
@@ -328,13 +328,13 @@ paths:
         required: false
       responses:
         200:
-          description: The content of the file in plain text, success
+          description: The content of the file in plain text, response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: Failure, the file content could not be read
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /folder:
     get:
       tags:
@@ -359,11 +359,11 @@ paths:
         200:
           description: The content of the folder as zip archive
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: The content of the folder could not be obtained
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
   /command:
     post:
       tags:
@@ -386,15 +386,15 @@ paths:
           $ref: '#/definitions/commands_content'
       responses:
         200:
-          description: commands start success
+          description: commands start response
           schema:
-            $ref: "#/definitions/ApiResponseSuccess"
+            $ref: "#/definitions/ApiResponse"
         404:
           description: commands start failure
           schema:
-            $ref: "#/definitions/ApiResponseFailure"
+            $ref: "#/definitions/ApiResponse"
 definitions:
-    ApiResponseSuccess:
+    ApiResponse:
       type: object
       properties:
         message:
@@ -402,24 +402,6 @@ definitions:
         description:
           type: "string"
         code:
-          type: "string"
-        time:
-          type: "string"
-          format: "date-time"
-        name:
-          type: "string"
-        version:
-          type: "string"
-    ApiResponseFailure:
-      type: object
-      properties:
-        message:
-          type: "string"
-        description:
-          type: "string"
-        code:
-          type: "string"
-        stacktrace:
           type: "string"
         time:
           type: "string"

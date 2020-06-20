@@ -35,7 +35,7 @@ jobs:
           command: ping -n 5 127.0.0.1
           name: "wait some time"
       - run:
-          command: python -m unittest discover tests/rest-win "*_test.py"
+          command: python -m unittest discover tests/rest_win "*_test.py"
           name: "run integration tests"
       - store_artifacts:
           path: main-win.exe

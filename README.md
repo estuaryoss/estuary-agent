@@ -23,7 +23,7 @@ Estuary test runner service. This service runs your tests.
 [centos](https://hub.docker.com/r/dinutac/estuary-testrunner-centos)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-testrunner-centos.svg)
 
 ## Api docs
-[4.0.2](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.2)
+[4.0.4](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.4)
 
 ## Postman collection
 [Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe)

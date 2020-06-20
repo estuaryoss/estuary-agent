@@ -2,8 +2,6 @@ import json
 import os
 import re
 import stat
-import sys
-import traceback
 from pathlib import Path
 from secrets import token_hex
 
@@ -59,10 +57,10 @@ def before_request():
             headers = {
                 'X-Request-ID': message_dumper.get_header("X-Request-ID")
             }
-            return Response(json.dumps(http.failure(ApiCodeConstants.UNAUTHORIZED,
-                                                    ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UNAUTHORIZED),
-                                                    "Invalid Token",
-                                                    str(traceback.format_exc()))), 401, mimetype="application/json",
+            return Response(json.dumps(http.response(code=ApiCodeConstants.UNAUTHORIZED,
+                                                     message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UNAUTHORIZED),
+                                                     description="Invalid Token")), 401,
+                            mimetype="application/json",
                             headers=headers)
 
 
@@ -91,7 +89,8 @@ def get_swagger():
 def get_vars():
     http = HttpResponse()
     return Response(json.dumps(
-        http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), dict(os.environ))),
+        http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                      description=dict(os.environ))),
         200, mimetype="application/json")
 
 
@@ -100,7 +99,9 @@ def ping():
     http = HttpResponse()
 
     return Response(
-        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), "pong")),
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description="pong")),
         200, mimetype="application/json")
 
 
@@ -109,7 +110,8 @@ def about():
     http = HttpResponse()
 
     return Response(json.dumps(
-        http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), properties["name"])),
+        http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                      description=properties["name"])),
         200,
         mimetype="application/json")
 
@@ -131,13 +133,12 @@ def get_content_with_env(template, variables):
     try:
         r = Render(os.environ['TEMPLATE'], os.environ['VARIABLES'])
         response = Response(r.rend_template(), 200, mimetype="text/plain")
-        # response = http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), result), 200
     except Exception as e:
-        result = "Exception({})".format(e.__str__())
-        response = Response(json.dumps(http.failure(ApiCodeConstants.JINJA2_RENDER_FAILURE,
-                                                    ErrorCodes.HTTP_CODE.get(ApiCodeConstants.JINJA2_RENDER_FAILURE),
-                                                    result,
-                                                    str(traceback.format_exc()))), 404, mimetype="application/json")
+        response = Response(json.dumps(http.response(code=ApiCodeConstants.JINJA2_RENDER_FAILURE,
+                                                     message=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.JINJA2_RENDER_FAILURE),
+                                                     description="Exception({})".format(e.__str__()))), 404,
+                            mimetype="application/json")
 
     return response
 
@@ -157,15 +158,15 @@ def get_test_info():
         test_env_vars["processes"] = [p.info for p in psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
     except Exception as e:
-        exception = "Exception({})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.GET_CONTAINER_TEST_INFO_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.GET_CONTAINER_TEST_INFO_FAILURE),
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.GET_TEST_INFO_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.GET_TEST_INFO_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
     return Response(
         json.dumps(
-            http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_env_vars)),
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=test_env_vars)),
         200,
         mimetype="application/json")
 
@@ -178,27 +179,27 @@ def set_env():
     try:
         input_json = json.loads(input_data)
     except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.INVALID_JSON_PAYLOAD,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_JSON_PAYLOAD) % str(
-                                                    input_data),
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.INVALID_JSON_PAYLOAD,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.INVALID_JSON_PAYLOAD) % str(
+                                                     input_data),
+                                                 description="Exception({0})".format(e.__str__()))), 404,
+                        mimetype="application/json")
 
     try:
         for key, value in input_json.items():
             if key not in unmodifiable_env_vars:
                 os.environ[key] = value
     except Exception as e:
-        exception = "Exception({})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.SET_ENV_VAR_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SET_ENV_VAR_FAILURE) % str(
-                                                    input_data),
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.SET_ENV_VAR_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.SET_ENV_VAR_FAILURE) % str(
+                                                     input_data),
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
     return Response(
         json.dumps(
-            http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), input_json)),
+            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), input_json)),
         200,
         mimetype="application/json")
 
@@ -209,16 +210,15 @@ def get_env(name):
     http = HttpResponse()
     try:
         response = Response(json.dumps(
-            http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                         os.environ[name])), 200,
+            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          os.environ[name])), 200,
             mimetype="application/json")
     except Exception as e:
-        result = "Exception({})".format(e.__str__())
-        response = Response(json.dumps(http.failure(ApiCodeConstants.GET_CONTAINER_ENV_VAR_FAILURE,
-                                                    ErrorCodes.HTTP_CODE.get(
-                                                        ApiCodeConstants.GET_CONTAINER_ENV_VAR_FAILURE) % name,
-                                                    result,
-                                                    str(traceback.format_exc()))), 404, mimetype="application/json")
+        response = Response(json.dumps(http.response(code=ApiCodeConstants.GET_ENV_VAR_FAILURE,
+                                                     message=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.GET_ENV_VAR_FAILURE) % name,
+                                                     description="Exception({})".format(e.__str__()))), 404,
+                            mimetype="application/json")
     return response
 
 
@@ -235,10 +235,12 @@ def test_start(test_id):
     input_data = request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
-        return Response(json.dumps(http.failure(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 )), 404, mimetype="application/json")
     try:
         input_data_list = io_utils.get_filtered_list_regex(input_data.split("\n"),
                                                            re.compile(r'(\s+|[^a-z]|^)rm\s+.*$'))
@@ -251,14 +253,15 @@ def test_start(test_id):
         # input_data_list.insert(0, "python")
         cmd_utils.run_cmd_detached(input_data_list)
     except Exception as e:
-        result = "Exception({})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.TEST_START_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_START_FAILURE) % test_id,
-                                                result,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.TEST_START_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.TEST_START_FAILURE) % test_id,
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
 
     return Response(
-        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_id)),
+        json.dumps(
+            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_id)),
         200,
         mimetype="application/json")
 
@@ -272,30 +275,30 @@ def upload_file():
         file_content = request.get_data()
         file_path = request.headers.get(f"{header_key}")
         if not file_path:
-            return Response(json.dumps(http.failure(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED,
-                                                    ErrorCodes.HTTP_CODE.get(
-                                                        ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
-                                                    ErrorCodes.HTTP_CODE.get(
-                                                        ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
-                                                    str(traceback.format_exc()))), 404, mimetype="application/json")
+            return Response(json.dumps(http.response(code=ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED,
+                                                     message=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
+                                                     description=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 404,
+                            mimetype="application/json")
         if not file_content:
-            return Response(json.dumps(http.failure(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
-                                                    ErrorCodes.HTTP_CODE.get(
-                                                        ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                    ErrorCodes.HTTP_CODE.get(
-                                                        ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                    str(traceback.format_exc()))), 404, mimetype="application/json")
+            return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                     message=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                     description=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
+                            mimetype="application/json")
         io_utils.write_to_file_binary(file_path, file_content)
     except Exception as e:
-        exception = "Exception({})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE),
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.UPLOAD_TEST_CONFIG_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
 
     return Response(
-        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))), 200,
+        json.dumps(http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                                 ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))), 200,
         mimetype="application/json")
 
 
@@ -307,22 +310,21 @@ def get_file():
 
     file_path = request.headers.get(f"{header_key}")
     if not file_path:
-        return Response(json.dumps(http.failure(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 404,
+                        mimetype="application/json")
 
     try:
         response = io_utils.read_file_byte_array(file_path), 200
     except Exception as e:
-        exception = "Exception({})".format(e.__str__())
-        response = Response(json.dumps(http.failure(ApiCodeConstants.GET_FILE_FAILURE,
-                                                    ErrorCodes.HTTP_CODE.get(
-                                                        ApiCodeConstants.GET_FILE_FAILURE),
-                                                    exception,
-                                                    str(traceback.format_exc()))), 404, mimetype="application/json")
+        response = Response(json.dumps(http.response(code=ApiCodeConstants.GET_FILE_FAILURE,
+                                                     message=ErrorCodes.HTTP_CODE.get(
+                                                         ApiCodeConstants.GET_FILE_FAILURE),
+                                                     description="Exception({})".format(e.__str__()))), 404,
+                            mimetype="application/json")
     return response
 
 
@@ -335,22 +337,21 @@ def get_results_folder():
 
     folder_path = request.headers.get(f"{header_key}")
     if not folder_path:
-        return Response(json.dumps(http.failure(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 404,
+                        mimetype="application/json")
 
     try:
         io_utils.zip_file(archive_name, folder_path)
     except Exception as e:
-        result = "Exception({})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.FOLDER_ZIP_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.FOLDER_ZIP_FAILURE) % folder_path,
-                                                result,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.FOLDER_ZIP_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.FOLDER_ZIP_FAILURE) % folder_path,
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
     return flask.send_file(
         f"/tmp/{archive_name}.zip",
         mimetype='application/zip',
@@ -367,7 +368,7 @@ def test_stop():
 
     try:
         response = get_test_info()
-        pid = json.loads(response.get_data()).get('message').get('pid')
+        pid = json.loads(response.get_data()).get('description').get('pid')
         if not isinstance(pid, str):
             if psutil.pid_exists(int(pid)):
                 parent = psutil.Process()
@@ -378,15 +379,17 @@ def test_stop():
                 _, alive = psutil.wait_procs(children, timeout=3, callback=process_utils.on_terminate)
                 for p in alive:
                     p.kill()
-    except:
-        exception = "Exception({0})".format(sys.exc_info()[0])
-        return Response(json.dumps(http.failure(ApiCodeConstants.TEST_STOP_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.TEST_STOP_FAILURE) % test_id,
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.TEST_STOP_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.TEST_STOP_FAILURE) % test_id,
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
 
     return Response(
-        json.dumps(http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), test_id)),
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=test_id)),
         200,
         mimetype="application/json")
 
@@ -401,10 +404,12 @@ def execute_command():
     input_data = request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
-        return Response(json.dumps(http.failure(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
+                        mimetype="application/json")
     try:
         input_data_list = io_utils.get_filtered_list_regex(input_data.split("\n"),
                                                            re.compile(r'(\s+|[^a-z]|^)rm\s+.*$'))
@@ -412,15 +417,15 @@ def execute_command():
         test_runner = TestRunnerInMemory()
         response = test_runner.run_commands(input_data_list)
     except Exception as e:
-        exception = "Exception({0})".format(e.__str__())
-        return Response(json.dumps(http.failure(ApiCodeConstants.COMMAND_EXEC_FAILURE,
-                                                ErrorCodes.HTTP_CODE.get(
-                                                    ApiCodeConstants.COMMAND_EXEC_FAILURE),
-                                                exception,
-                                                str(traceback.format_exc()))), 404, mimetype="application/json")
+        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_EXEC_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.COMMAND_EXEC_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
 
     return Response(
         json.dumps(
-            http.success(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), response)),
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=response)),
         200,
         mimetype="application/json")
