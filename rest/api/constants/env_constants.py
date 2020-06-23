@@ -18,8 +18,8 @@ class EnvConstants:
         os.environ['TEMPLATES_DIR'] = TEMPLATES_PATH
         print("TEMPLATES_DIR env var not set, defaulting to : " + os.environ.get('TEMPLATES_DIR'))
 
-    TEST_INFO_PATH = VARIABLES_PATH + "/testinfo.json"
-    COMMAND_INFO_PATH = VARIABLES_PATH + "/commandinfo.json"
+    TEST_INFO_PATH = "testinfo.json"
+    COMMAND_INFO_PATH = "commandinfo.json"
 
     print("WORKSPACE : " + WORKSPACE)
     print("TEMPLATES_PATH : " + TEMPLATES_PATH)

@@ -147,8 +147,7 @@ def get_content_with_env(template, variables):
 def get_test_info():
     http = HttpResponse()
     io_utils = IOUtils()
-    variables = "testinfo.json"
-    file = EnvConstants.VARIABLES_PATH + "/" + variables
+    file = "testinfo.json"
 
     try:
         file_path = Path(file)
@@ -229,6 +228,7 @@ def test_start(test_id):
     start_py_path = str(Path(".").absolute()) + "/start.py"
     os.environ['TEMPLATE'] = "start.py"
     os.environ['VARIABLES'] = variables
+    command = []
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
     http = HttpResponse()
@@ -242,16 +242,17 @@ def test_start(test_id):
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                  )), 404, mimetype="application/json")
     try:
-        input_data_list = io_utils.get_filtered_list_regex(input_data.split("\n"),
-                                                           re.compile(r'(\s+|[^a-z]|^)rm\s+.*$'))
-        input_data_list = list(map(lambda x: x.strip(), input_data_list))
+        input_data_list = list(map(lambda x: x.strip(), io_utils.get_filtered_list_regex(input_data.split("\n"),
+                                                                                         re.compile(
+                                                                                             r'(\s+|[^a-z]|^)rm\s+.*$'))))
         test_info_init["id"] = test_id
         io_utils.write_to_file_dict(EnvConstants.TEST_INFO_PATH, test_info_init)
         os.chmod(start_py_path, stat.S_IRWXU)
-        input_data_list.insert(0, test_id)
-        input_data_list.insert(0, start_py_path)
-        # input_data_list.insert(0, "python")
-        cmd_utils.run_cmd_detached(input_data_list)
+        command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
+        command.insert(0, test_id)  # first arg is test id
+        command.insert(0, start_py_path)
+        # final_command.insert(0, "python")
+        cmd_utils.run_cmd_detached(command)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.TEST_START_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
@@ -363,8 +364,7 @@ def test_stop():
     io_utils = IOUtils()
     process_utils = ProcessUtils(logger)
     http = HttpResponse()
-    variables = "testinfo.json"
-    test_id = json.loads(io_utils.read_file(os.environ.get('VARS_DIR') + f"/{variables}"))["id"]
+    test_id = json.loads(io_utils.read_file("testinfo.json"))["id"]
 
     try:
         response = get_test_info()
