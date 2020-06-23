@@ -43,7 +43,7 @@ def before_request():
     ctx = app.app_context()
     http = HttpResponse()
     ctx.g.xid = token_hex(8)
-    request_uri = request.environ.get("REQUEST_URI")
+    request_uri = request.full_path
 
     # add here your custom header to be logged with fluentd
     message_dumper.set_header("X-Request-ID",
