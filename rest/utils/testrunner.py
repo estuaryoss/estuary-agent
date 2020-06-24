@@ -19,17 +19,17 @@ class TestRunner:
         start_total = datetime.datetime.now()
         commands = list(map(lambda item: item.strip(), commands))
 
-        self.command_dict['id'] = test_id
+        self.command_dict['id'] = str(test_id)
         self.command_dict['pid'] = os.getpid()
         input_data_dict = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
-        self.command_dict["started"] = "true"
+        self.command_dict["started"] = True
         self.command_dict["commands"] = input_data_dict
         self.command_dict["startedat"] = str(datetime.datetime.now())
 
         self.__run_commands(commands, json_file=json_file)
 
-        self.command_dict['finished'] = "true"
-        self.command_dict['started'] = "false"
+        self.command_dict['finished'] = True
+        self.command_dict['started'] = False
         end_total = datetime.datetime.now()
         self.command_dict['finishedat'] = str(end_total)
         self.command_dict['duration'] = round((end_total - start_total).total_seconds())

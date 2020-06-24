@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -20,12 +21,12 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 
 test_info_init = {
-    "finished": "false",
-    "started": "false",
-    "startedat": "none",
-    "finishedat": "none",
-    "duration": "none",
+    "finished": False,
+    "started": False,
+    "startedat": str(datetime.datetime.now()),
+    "finishedat": str(datetime.datetime.now()),
+    "duration": 0,
     "id": "none",
-    "pid": "none",
+    "pid": 0,
     "commands": {}
 }
