@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import multiprocessing
 import os
 from pathlib import Path
 
@@ -12,6 +13,9 @@ from rest.utils.env_startup import EnvStartup
 from rest.utils.io_utils import IOUtils
 
 if __name__ == "__main__":
+    # fix for pyinstaller
+    multiprocessing.freeze_support()
+
     host = '0.0.0.0'
     port = EnvStartup.get_instance().get("port")
     fluentd_tag = "startup"

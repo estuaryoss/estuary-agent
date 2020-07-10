@@ -3,7 +3,7 @@ swagger_file_content = '''
 info:
   description: |
     Estuary testrunner which will run your commands and tests
-  version: "4.0.4"
+  version: "4.0.6"
   title: estuary-testrunner
   termsOfService: http://swagger.io/terms/
   contact:
@@ -368,7 +368,7 @@ paths:
     post:
       tags:
         - estuary-testrunner
-      summary: Starts multiple commands in blocking mode sequentially. Set the client timeout at needed value.
+      summary: Starts multiple commands in blocking mode, but executed sequentially. Set the client timeout at needed value.
       consumes:
         - text/plain
       produces:
@@ -393,6 +393,35 @@ paths:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
+  /commandparallel:
+    post:
+      tags:
+        - estuary-testrunner
+      summary: Starts multiple commands in blocking mode, but executed in parallel. Set the client timeout at needed value.
+      consumes:
+        - text/plain
+      produces:
+        - application/json
+      parameters:
+      - in: header
+        name: Token
+        type: string
+        required: false
+      - name: commands
+        in: body
+        description: Commands to run. E.g. ls -lrt
+        required: true
+        schema:
+          $ref: '#/definitions/commands_content'
+      responses:
+        200:
+          description: commands start response
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: commands start failure
+          schema:
+            $ref: "#/definitions/ApiResponse"  
 definitions:
     ApiResponse:
       type: object

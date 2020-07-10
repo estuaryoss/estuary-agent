@@ -1,6 +1,8 @@
+os: linux
 dist: xenial
 language: python
-python: 3.6
+python:
+  - "3.6"
 script: skip
 
 env:
@@ -11,7 +13,6 @@ jobs:
     - stage: test
     #run unit tests for render
     - language: python
-      python: 3.6
       env:
         TEMPLATES_DIR: inputs/templates
         VARS_DIR: inputs/variables
@@ -29,7 +30,6 @@ jobs:
 
     #run testrunner tests in docker
     - language: python
-      python: 3.6
       services: docker
       env:
         SCRIPTS_DIR: tests
@@ -50,7 +50,6 @@ jobs:
 
       #run executable tests. exec with pyinstaller
     - language: python
-      python: 3.6
       services: docker
       env:
         ISOLATED: true
@@ -78,7 +77,6 @@ jobs:
 
     #run executable tests - centos docker
     - language: python
-      python: 3.6
       services: docker
       env:
         ISOLATED: true
@@ -107,7 +105,6 @@ jobs:
 
         #run templating tests
     - language: python
-      python: 3.6
       services: docker
       env:
         ISOLATED: true
@@ -123,7 +120,6 @@ jobs:
           $DOCKER_SCRIPTS_DIR/entities/render.py
 
     - language: python
-      python: 3.6
       services:
         - docker
       env:
@@ -157,24 +153,22 @@ jobs:
       deploy:
         - provider: script
           script: bash docker_push_tag.sh
-          skip_cleanup: true
+          cleanup: false
           on:
             tags: true
 
         - provider: script
           script: bash docker_push_master.sh
-          skip_cleanup: true
+          cleanup: false
           on:
             branch: master
 
         - provider: releases
-          api_key: $GITHUB_TOKEN
+          token: $GITHUB_TOKEN
           file:
             - "main-linux"
             - "start.py-linux"
-          skip_cleanup: true
+          cleanup: false
           on:
             tags: true
-
-
 

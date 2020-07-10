@@ -18,7 +18,7 @@ from tests.rest_win.error_codes import ErrorCodes
 class FlaskServerTestCase(unittest.TestCase):
     server = "http://127.0.0.1:8080"
 
-    expected_version = "4.0.5"
+    expected_version = "4.0.6"
 
     def setUp(self):
         requests.delete(self.server + "/test")
@@ -369,7 +369,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('finished'), False)
         self.assertNotEqual(body.get('description').get('startedat'), "none")
         self.assertNotEqual(body.get('description').get('finishedat'), "none")
-        self.assertEqual(body.get('description').get('duration'), 0)
+        self.assertEqual(round(int(body.get('description').get('duration'))), 0)
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "scheduled")
 
@@ -657,40 +657,6 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('details').get('args'), list)
         self.assertIsNotNone(body.get('time'))
 
-    def test_executecommand_rm_not_allowed_n(self):
-        command = "rm -rf /tmp"
-
-        response = requests.post(
-            self.server + f"/command",
-            data=command)
-
-        body = response.json()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(body.get('description').get('commands')), 0)
-        self.assertEqual(body.get('version'), self.expected_version)
-        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
-
-    def test_executecommand_first_valid_is_executed_n(self):
-        command = "rm -rf /tmp\ndir"
-        commands = command.split("\n")
-
-        response = requests.post(
-            self.server + f"/command",
-            data=command)
-
-        body = response.json()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(body.get("message"),
-                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(len(body.get('description').get("commands")), 1)  # only 1 cmd is executed
-        self.assertEqual(body.get('description').get("commands").get(commands[1]).get('details').get('code'), 0)
-        self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get('details').get('out'), "")
-        self.assertEqual(body.get('description').get("commands").get(commands[1]).get('details').get('err'), "")
-        self.assertEqual(body.get('version'), self.expected_version)
-        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
-
     def test_executecommand_sum_seq_p(self):
         a = 2
         b = 3
@@ -704,9 +670,27 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertEqual(body.get('description').get('duration'), a + b - 2)
-        self.assertEqual(body.get('description').get('commands').get(commands[0]).get('duration'), a - 1)
-        self.assertEqual(body.get('description').get('commands').get(commands[1]).get('duration'), b - 1)
+        self.assertEqual(round(int(body.get('description').get('duration'))), a + b - 2)
+        self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
+        self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
+        self.assertIsNotNone(body.get('time'))
+
+    def test_executecommand_sum_parallel_p(self):
+        a = 2
+        b = 3
+        commands = ["ping -n {} 127.0.0.1".format(a), "ping -n {} 127.0.0.1".format(b)]
+
+        response = requests.post(self.server + f"/commandparallel", data="\n".join(commands))
+        body = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
+        self.assertEqual(round(int(body.get('description').get('duration'))), b - 1)
+        self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
+        self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
         self.assertIsNotNone(body.get('time'))
 
     def test_executecommand_arg_with_spaces(self):
@@ -723,7 +707,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(len(body.get('description').get('commands').get(raw_cmd).get('details').get('args')),
                          len(shlex_cmd))
-        self.assertEqual(body.get('description').get('commands').get(raw_cmd).get('details').get('args')[-1], shlex_cmd[-1])
+        self.assertEqual(body.get('description').get('commands').get(raw_cmd).get('details').get('args')[-1],
+                         shlex_cmd[-1])
         self.assertIsNotNone(body.get('time'))
 
     def test_executetest_sum_seq_p(self):
@@ -744,9 +729,12 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertEqual(body.get('description').get('duration'), a + b - 2)
-        self.assertEqual(body.get('description').get('commands').get(commands[0]).get('duration'), a - 1)
-        self.assertEqual(body.get('description').get('commands').get(commands[1]).get('duration'), b - 1)
+        self.assertEqual(round(int(body.get('description').get('duration'))), a + b - 2)
+        self.assertIsInstance(body.get('description').get('duration'), float)
+        self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
+        self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('duration'), float)
+        self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
+        self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('duration'), float)
         self.assertIsNotNone(body.get('time'))
 
     def test_executecommand_timeout_from_client_n(self):

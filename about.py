@@ -1,6 +1,6 @@
 properties = {
     "name": "estuary-testrunner",
-    "version": "4.0.5",
+    "version": "4.0.6",
     "description": "run your commands and tests",
     "author": "Catalin Dinuta",
     "platforms": ["Linux", "Raspbian", "Mac", "Windows"],

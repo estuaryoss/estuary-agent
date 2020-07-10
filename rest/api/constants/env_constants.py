@@ -20,7 +20,3 @@ class EnvConstants:
 
     TEST_INFO_PATH = "testinfo.json"
     COMMAND_INFO_PATH = "commandinfo.json"
-
-    print("WORKSPACE : " + WORKSPACE)
-    print("TEMPLATES_PATH : " + TEMPLATES_PATH)
-    print("VARIABLES_PATH : " + VARIABLES_PATH)

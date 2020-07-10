@@ -16,7 +16,7 @@ class TestRunner:
         self.__io_utils = IOUtils()
 
     def run_commands(self, json_file, test_id, commands):
-        start_total = datetime.datetime.now()
+        start_time = datetime.datetime.now()
         commands = list(map(lambda item: item.strip(), commands))
 
         self.command_dict['id'] = str(test_id)
@@ -30,9 +30,9 @@ class TestRunner:
 
         self.command_dict['finished'] = True
         self.command_dict['started'] = False
-        end_total = datetime.datetime.now()
-        self.command_dict['finishedat'] = str(end_total)
-        self.command_dict['duration'] = round((end_total - start_total).total_seconds())
+        end_time = datetime.datetime.now()
+        self.command_dict['finishedat'] = str(end_time)
+        self.command_dict['duration'] = (end_time - start_time).total_seconds()
         self.__io_utils.write_to_file_dict(json_file, self.command_dict)
 
         return self.command_dict
@@ -57,6 +57,6 @@ class TestRunner:
             self.command_dict['commands'][command]['status'] = status_finished
             end = datetime.datetime.now()
             self.command_dict['commands'][command]['finishedat'] = str(end)
-            self.command_dict['commands'][command]['duration'] = round((end - start).total_seconds())
+            self.command_dict['commands'][command]['duration'] = (end - start).total_seconds()
             self.command_dict['commands'][command]['details'] = details[command]
             self.__io_utils.write_to_file_dict(json_file, self.command_dict)

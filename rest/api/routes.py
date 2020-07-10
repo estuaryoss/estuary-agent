@@ -1,6 +1,5 @@
 import json
 import os
-import re
 import stat
 from pathlib import Path
 from secrets import token_hex
@@ -27,6 +26,7 @@ from rest.utils.fluentd_utils import FluentdUtils
 from rest.utils.io_utils import IOUtils
 from rest.utils.process_utils import ProcessUtils
 from rest.utils.testrunner_in_memory import TestRunnerInMemory
+from rest.utils.testrunner_parallel import TestRunnerParallel
 
 app = create_app()
 logger = \
@@ -242,9 +242,7 @@ def test_start(test_id):
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                  )), 404, mimetype="application/json")
     try:
-        input_data_list = list(map(lambda x: x.strip(), io_utils.get_filtered_list_regex(input_data.split("\n"),
-                                                                                         re.compile(
-                                                                                             r'(\s+|[^a-z]|^)rm\s+.*$'))))
+        input_data_list = input_data.split("\n")
         test_info_init["id"] = test_id
         io_utils.write_to_file_dict(EnvConstants.TEST_INFO_PATH, test_info_init)
         os.chmod(start_py_path, stat.S_IRWXU)
@@ -399,7 +397,6 @@ def execute_command():
     variables = "commandinfo.json"
     os.environ['TEMPLATE'] = "start.py"
     os.environ['VARIABLES'] = variables
-    io_utils = IOUtils()
     http = HttpResponse()
     input_data = request.data.decode("UTF-8", "replace").strip()
 
@@ -411,10 +408,44 @@ def execute_command():
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
                         mimetype="application/json")
     try:
-        input_data_list = io_utils.get_filtered_list_regex(input_data.split("\n"),
-                                                           re.compile(r'(\s+|[^a-z]|^)rm\s+.*$'))
+        input_data_list = input_data.split("\n")
         input_data_list = list(map(lambda x: x.strip(), input_data_list))
         test_runner = TestRunnerInMemory()
+        response = test_runner.run_commands(input_data_list)
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_EXEC_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.COMMAND_EXEC_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 404,
+                        mimetype="application/json")
+
+    return Response(
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=response)),
+        200,
+        mimetype="application/json")
+
+
+@app.route('/commandparallel', methods=['POST', 'PUT'])
+def execute_command_parallel():
+    variables = "commandinfo.json"
+    os.environ['TEMPLATE'] = "start.py"
+    os.environ['VARIABLES'] = variables
+    http = HttpResponse()
+    input_data = request.data.decode("UTF-8", "replace").strip()
+
+    if not input_data:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
+                        mimetype="application/json")
+    try:
+        input_data_list = input_data.split("\n")
+        input_data_list = list(map(lambda x: x.strip(), input_data_list))
+        test_runner = TestRunnerParallel()
         response = test_runner.run_commands(input_data_list)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_EXEC_FAILURE,

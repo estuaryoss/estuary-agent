@@ -25,7 +25,7 @@ test_info_init = {
     "started": False,
     "startedat": str(datetime.datetime.now()),
     "finishedat": str(datetime.datetime.now()),
-    "duration": 0,
+    "duration": 0.000000,
     "id": "none",
     "pid": 0,
     "commands": {}

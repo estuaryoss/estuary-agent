@@ -23,13 +23,13 @@ Estuary test runner service. This service runs your tests.
 [centos](https://hub.docker.com/r/dinutac/estuary-testrunner-centos)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-testrunner-centos.svg)
 
 ## Api docs
-[4.0.4](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.4)
+[4.0.6](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.6)
 
 ## Postman collection
 [Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe)
 
 ## Use cases:
--  remote command executor through cli version. Any command can be executed, except "rm" like commands
+-  remote command executor through cli version. 
 -  testing: test execution, getting results ...
 
 ## Container support
