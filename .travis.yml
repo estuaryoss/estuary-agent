@@ -151,24 +151,25 @@ jobs:
         - rm -rf build
         - chmod +x *.sh
       deploy:
-        - provider: script
-          script: bash docker_push_tag.sh
-          cleanup: false
-          on:
-            tags: true
-
-        - provider: script
-          script: bash docker_push_master.sh
-          cleanup: false
-          on:
-            branch: master
-
         - provider: releases
           token: $GITHUB_TOKEN
           file:
             - "main-linux"
             - "start.py-linux"
-          cleanup: false
+          skip_cleanup: true
           on:
             tags: true
+
+        - provider: script
+          script: bash docker_push_tag.sh
+          skip_cleanup: true
+          on:
+            tags: true
+
+        - provider: script
+          script: bash docker_push_master.sh
+          skip_cleanup: true
+          on:
+            branch: master
+
 
