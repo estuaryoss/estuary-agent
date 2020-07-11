@@ -3,6 +3,7 @@
 echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
 #centos
+\cp dist/start start.py
 docker build -t dinutac/estuary-testrunner-centos:latest -f Dockerfiles/Dockerfile_centos .
 docker push dinutac/estuary-testrunner-centos:latest
 

@@ -145,7 +145,6 @@ jobs:
         - ls -lrt dist
         - cp dist/main_flask main-linux
         - \cp dist/start start.py-linux
-        - \cp dist/start start.py
         - ls -lrt
         - rm -rf dist
         - rm -rf build
@@ -170,6 +169,7 @@ jobs:
           script: bash docker_push_master.sh
           skip_cleanup: true
           on:
+            tags: false
             branch: master
 
 
