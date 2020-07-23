@@ -12,5 +12,5 @@ fluent-logger
 Jinja2
 psutil
 pyinstaller
-# setuptools==44.0.0 #for windows. issues with newer one
+setuptools==44.0.0
 # pypiwin32 #for windows pyinstalller

@@ -74,6 +74,7 @@ def after_request(http_response):
     except:
         app.logger.debug("Message was not altered: " + message_dumper.dump(http_response))
 
+    http_response.direct_passthrough = False
     response = fluentd_utils.emit(tag="api", msg=message_dumper.dump(http_response))
     app.logger.debug(response)
 
