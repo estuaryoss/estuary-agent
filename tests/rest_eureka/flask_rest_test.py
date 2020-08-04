@@ -24,7 +24,7 @@ class FlaskServerEurekaTestCase(unittest.TestCase):
     def test_eureka_registration(self):
         up_services = EurekaClient(f"{os.environ.get('EUREKA_SERVER')}").get_apps()
         self.assertEqual(len(up_services), 1)  # 1 instance registered
-        self.assertEqual(up_services[0], "estuary-testrunner")  # 1 instance registered
+        self.assertEqual(up_services[0], "estuary-agent")  # 1 instance registered
 
 
 if __name__ == '__main__':

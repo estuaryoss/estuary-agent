@@ -2,7 +2,7 @@ FROM centos:latest
 
 ENV TZ UTC
 ENV PORT 8080
-ENV SCRIPTS_DIR /root/testrunner
+ENV SCRIPTS_DIR /root/agent
 ENV WORKSPACE $SCRIPTS_DIR
 ENV TEMPLATES_DIR $WORKSPACE/templates
 ENV VARS_DIR $WORKSPACE/variables
@@ -16,8 +16,8 @@ COPY main-linux $SCRIPTS_DIR
 #copy start script, actually this is a binary
 COPY start.py-linux $SCRIPTS_DIR/start.py
 
-# ADD https://github.com/dinuta/estuary-testrunner/releases/download/4.0.1/main-linux $SCRIPTS_DIR
+# ADD https://github.com/dinuta/estuary-agent/releases/download/4.0.1/main-linux $SCRIPTS_DIR
 RUN chmod +x $SCRIPTS_DIR/main-linux
 RUN chmod +x $SCRIPTS_DIR/start.py
 
-CMD ["/root/testrunner/main-linux"]
+CMD ["/root/agent/main-linux"]

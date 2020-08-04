@@ -1,36 +1,37 @@
 <h1 align="center"><img src="./docs/images/banner_estuary.png" alt="Testing as a service with Docker"></h1>  
 
-Support project: <a href="https://paypal.me/catalindinuta?locale.x=en_US"><img src="https://pbs.twimg.com/profile_images/1145724063106519040/b1L98qh9_400x400.jpg" height="40" width="40" align="center"></a>    
+Support project: <a href="https://paypal.me/catalindinuta?locale.x=en_US"><img src="https://lh3.googleusercontent.com/Y2_nyEd0zJftXnlhQrWoweEvAy4RzbpDah_65JGQDKo9zCcBxHVpajYgXWFZcXdKS_o=s180-rw" height="40" width="40" align="center"></a>    
 
 # Testing as a Service
 
-## Estuary testrunner
-Estuary test runner service. This service runs your tests.
+## Estuary agent
+Estuary agent is a service that exposes your cli commands/app via REST API.
 
 ## Coverage and code quality
 [![Coverage Status](https://coveralls.io/repos/github/dinuta/estuary-testrunner/badge.svg?branch=master)](https://coveralls.io/github/dinuta/estuary-testrunner?branch=master)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7aeb5e03e5ff4acb9ffc4f1b2e705596)](https://www.codacy.com/manual/dinuta/estuary-testrunner?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dinuta/estuary-testrunner&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/cdce1567b4fa5a77da98/maintainability)](https://codeclimate.com/github/dinuta/estuary-testrunner/maintainability)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/60f44f5ab65e46a1b3ed92db34398910)](https://www.codacy.com/manual/dinuta/estuary-agent?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dinuta/estuary-agent&amp;utm_campaign=Badge_Grade)
+[![Maintainability](https://api.codeclimate.com/v1/badges/591c1ea4057f8c7d92ee/maintainability)](https://codeclimate.com/github/dinuta/estuary-agent/maintainability)
 
 ## Linux status
-[![Build Status](https://travis-ci.org/dinuta/estuary-testrunner.svg?branch=master)](https://travis-ci.org/dinuta/estuary-testrunner)
+[![Build Status](https://travis-ci.org/dinuta/estuary-agent.svg?branch=master)](https://travis-ci.org/dinuta/estuary-agent)
 
 ## Windows status
-[![CircleCI](https://circleci.com/gh/dinuta/estuary-testrunner.svg?style=svg)](https://circleci.com/gh/dinuta/estuary-testrunner)  
+[![CircleCI](https://circleci.com/gh/dinuta/estuary-agent.svg?style=svg)](https://circleci.com/gh/dinuta/estuary-agent)  
 
 ## Docker Hub
-[alpine](https://hub.docker.com/r/dinutac/estuary-testrunner)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-testrunner.svg)  
-[centos](https://hub.docker.com/r/dinutac/estuary-testrunner-centos)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-testrunner-centos.svg)
+[alpine](https://hub.docker.com/r/dinutac/estuary-agent)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-agent.svg)  
+[centos](https://hub.docker.com/r/dinutac/estuary-agent-centos)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-agent-centos.svg)
 
 ## Api docs
-[4.0.6](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.6)
+[4.0.7](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.7)
 
 ## Postman collection
-[Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe)
+[Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe?version=latest)
 
-## Use cases:
--  remote command executor through cli version. 
--  testing: test execution, getting results ...
+## General use cases:
+-  remote shell command executor 
+-  expose CLI app through REST API 
+-  test execution, getting results ...
 
 ## Container support
 -  mvn & java jdk  
@@ -38,13 +39,15 @@ Estuary test runner service. This service runs your tests.
 -  npm
 -  other: you can use this image as base and install on top your dependencies 
 
-## TestRunner service usage
-1. use the service embedded in this container and mount your testing framework
-2. build your absolute custom framework image and integrate this service as a self-contained application service (cli). Read [doc](https://github.com/dinuta/estuary-testrunner/wiki).
+## Agent service usage
+1. use the docker image and mount your testing framework
+2. build your absolute custom framework image and add this agent compiled as binary. Read [doc](https://github.com/dinuta/estuary-agent/wiki).
 
-Use cases:
-1. estuary-testrunner vs an external SUT / dockerized SUT
-2. estuary-testrunner used inside docker-compose with estuary-deployer
+## Testing use cases:
+1. agent used for integration testing controlling SUT / dockerized SUT
+2. agent used inside a docker-compose template with estuary-deployer, to control the automation framework
+
+Some use cases are documented in [wiki](https://github.com/dinuta/estuary-agent/wiki)
 
 ## Service run
 ### Docker compose
@@ -55,14 +58,14 @@ Use cases:
     docker run  
     -d 
     -p 8080:8080
-    dinutac/estuary-testrunner:<tag>
+    dinutac/estuary-agent:<tag>
     
     
 ### Kubernetes
     kubectl apply -f k8sdeployment.yml
     
 ### Eureka registration
-To have all your testrunner instances in a central location we use netflix eureka. This means your client will discover
+To have all your estuary-agent instances in a central location, Netflix Eureka is used. This means your client will discover
 all services used for your test and then spread the tests across all.
 
 Start Eureka server with docker:
@@ -71,7 +74,7 @@ Start Eureka server with docker:
     or
     docker run -p 8080:8080 dinutac/netflixoss-eureka:1.9.21
 
-Start your containers by specifying the full hostname or ip of the host machine on where your testrunner service resides.
+Start your containers by specifying the full hostname or ip of the host machine on where your agent service resides.
 Optionally you can define the WORKSPACE (default=/tmp)or PORT (default=8080).
 
     docker run \
@@ -79,11 +82,11 @@ Optionally you can define the WORKSPACE (default=/tmp)or PORT (default=8080).
     -e APP_IP_PORT=10.10.15.28:8081 -> the ip and port of the app
     -e WORKSPACE=/tmp/ -> optional;for multiplatform set it to your needs;default is /tmp/;E.g /workspace/
     -p 8081:8080
-    dinutac/estuary-testrunner:<tag>
+    dinutac/estuary-agent:<tag>
 
 ### Fluentd logging
 Please consult [Fluentd](https://github.com/fluent/fluentd) for logging setup.  
-Estuary-testrunner tags all logs in format ```estuary-testrunner.**```
+Agent tags all logs in format ```estuary-agent.**```
 
 Matcher example:  
 
@@ -98,7 +101,7 @@ Run example:
     docker run \
     -e FLUENTD_IP_PORT=10.10.15.28:24224
     -p 8080:8080
-    dinutac/estuary-testrunner:<tag>
+    dinutac/estuary-agent:<tag>
 
 ### Authentication
 For auth set HTTP_AUTH_TOKEN env variable.  
@@ -108,7 +111,7 @@ Run example:
     docker run \
     -e HTTP_AUTH_TOKEN=mysecret
     -p 8080:8080
-    dinutac/estuary-testrunner:<tag>
+    dinutac/estuary-agent:<tag>
 
 Then, access the Http Api. Call example:
   
@@ -116,7 +119,7 @@ Then, access the Http Api. Call example:
 
 ## Estuary stack
 [Estuary deployer](https://github.com/dinuta/estuary-deployer)  
-[Estuary testrunner](https://github.com/dinuta/estuary-testrunner)  
+[Estuary agent](https://github.com/dinuta/estuary-agent)  
 [Estuary discovery](https://github.com/dinuta/estuary-discovery)  
 [Estuary viewer](https://github.com/dinuta/estuary-viewer)  
 

@@ -16,7 +16,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     '/swagger/swagger.yml/',
     config={
-        'app_name': "estuary-testrunner"
+        'app_name': "estuary-agent"
     },
 )
 

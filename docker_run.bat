@@ -1,1 +1,1 @@
-docker run  -p 8080:8080 -v %CD%/inputs/templates:/data  -v %CD%/inputs/variables:/variables -v /var/run/docker.sock:/var/run/docker.sock dinutac/estuary-testrunner:latest
+docker run  -p 8080:8080 -v %CD%/inputs/templates:/data  -v %CD%/inputs/variables:/variables -v /var/run/docker.sock:/var/run/docker.sock dinutac/estuary-agent:latest

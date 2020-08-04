@@ -1,16 +1,16 @@
 version: "3.3"
 
 services:
-  estuary-testrunner:
-    container_name: estuary-testrunner
-    image: dinutac/estuary-testrunner:latest
-    hostname: estuary-testrunner
-#    entrypoint: tail -f /etc/alpine-release
+  estuary-agent:
+    container_name: estuary-agent
+    image: dinutac/estuary-agent:latest
+    hostname: estuary-agent
+    #    entrypoint: tail -f /etc/alpine-release
     command: bash -c "sleep 20 && /scripts/main_flask.py"
     environment:
-#      FLUENTD_IP_PORT: '192.168.100.12:24224'
+      #      FLUENTD_IP_PORT: '192.168.100.12:24224'
       EUREKA_SERVER: http://eureka-server:8080/eureka/v2 #your eureka server
-      APP_IP_PORT: estuary-testrunner:8080 #your app details: where it is and on which port. needed for service discovery and spread of tests from the test client
+      APP_IP_PORT: estuary-agent:8080 #your app details: where it is and on which port. needed for service discovery and spread of tests from the test client
     volumes:
       - ./inputs/templates:/scripts/inputs/templates
       - ./inputs/variables:/scripts/inputs/variables

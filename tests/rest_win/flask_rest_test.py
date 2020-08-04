@@ -18,7 +18,7 @@ from tests.rest_win.error_codes import ErrorCodes
 class FlaskServerTestCase(unittest.TestCase):
     server = "http://127.0.0.1:8080"
 
-    expected_version = "4.0.6"
+    expected_version = "4.0.7"
 
     def setUp(self):
         requests.delete(self.server + "/test")
@@ -78,7 +78,7 @@ class FlaskServerTestCase(unittest.TestCase):
         xid = "anaaremere"
         headers = {'X-Request-ID': xid}
         response = requests.get(self.server + "/about", headers=headers)
-        service_name = "estuary-testrunner"
+        service_name = "estuary-agent"
         body = response.json()
         headers = response.headers
         self.assertEqual(response.status_code, 200)
@@ -93,7 +93,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_about_endpoint_unauthorized(self):
         headers = {'Token': "invalidtoken"}
         response = requests.get(self.server + "/about", headers=headers)
-        service_name = "estuary-testrunner"
+        service_name = "estuary-agent"
         body = response.json()
         headers = response.headers
         self.assertEqual(response.status_code, 401)

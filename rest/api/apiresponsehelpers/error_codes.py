@@ -5,7 +5,7 @@ class ErrorCodes:
     HTTP_CODE = {
         ApiCodeConstants.SUCCESS: "Success",
         ApiCodeConstants.JINJA2_RENDER_FAILURE: "Jinja2 render failed",
-        ApiCodeConstants.GET_FILE_FAILURE: "Getting file or folder from the estuary testrunner service container failed",
+        ApiCodeConstants.GET_FILE_FAILURE: "Getting file or folder from the estuary agent service container failed",
         ApiCodeConstants.TEST_START_FAILURE: "Starting test id %s failed",
         ApiCodeConstants.TEST_STOP_FAILURE: "Stopping running test %s failed",
         ApiCodeConstants.GET_FILE_FAILURE_IS_DIR: "Getting %s from the container %s failed. It is a directory, not a file.",

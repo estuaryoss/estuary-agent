@@ -2,29 +2,29 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   labels:
-    k8s-app: estuary-testrunner
-  name: estuary-testrunner
+    k8s-app: estuary-agent
+  name: estuary-agent
   namespace: default
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      k8s-app: estuary-testrunner
+      k8s-app: estuary-agent
   template:
     metadata:
       labels:
-        k8s-app: estuary-testrunner
+        k8s-app: estuary-agent
     spec:
       containers:
-        - name: estuary-testrunner
-          image: dinutac/estuary-testrunner:latest
+        - name: estuary-agent
+          image: dinutac/estuary-agent:latest
           command: ["bash", "-c", "sleep 30 && /scripts/main_flask.py"] #wait until eureka up
           env:
             - name: EUREKA_SERVER
               value: "http://netflixoss-eureka:8080/eureka/v2"
             - name: APP_IP_PORT
-              value: "estuary-testrunner:8080"
+              value: "estuary-agent:8080"
           ports:
             - containerPort: 8080
 ---
@@ -32,8 +32,8 @@ kind: Service
 apiVersion: v1
 metadata:
   labels:
-    k8s-app: estuary-testrunner
-  name: estuary-testrunner
+    k8s-app: estuary-agent
+  name: estuary-agent
   namespace: default
 spec:
   type: NodePort
@@ -41,7 +41,7 @@ spec:
     - port: 8080
       targetPort: 8080
   selector:
-    k8s-app: estuary-testrunner
+    k8s-app: estuary-agent
 ---
 kind: Deployment
 apiVersion: apps/v1

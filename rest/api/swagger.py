@@ -2,9 +2,9 @@ swagger_file_content = '''
 "swagger": '2.0'
 info:
   description: |
-    Estuary testrunner which will run your commands and tests
-  version: "4.0.6"
-  title: estuary-testrunner
+    Estuary agent which will run your shell commands via REST API
+  version: "4.0.7"
+  title: estuary-agent
   termsOfService: http://swagger.io/terms/
   contact:
     email: constantin.dinuta@gmail.com
@@ -14,18 +14,18 @@ info:
 # host: localhost:8080
 basePath: /
 tags:
-  - name: estuary-testrunner
-    description: Estuary-testrunner service manages the test sessions
+  - name: estuary-agent
+    description: Estuary-agent runs shell commands and exposes CLI apps via pure REST API
     externalDocs:
       description: Find out more on github
-      url: https://github.com/dinuta/estuary-testrunner
+      url: https://github.com/dinuta/estuary-agent
 schemes:
   - http
 paths:
   /env:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Print all environment variables
       produces:
         - application/json
@@ -41,7 +41,7 @@ paths:
             $ref: "#/definitions/ApiResponse"
     post:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Set environment variables
       produces:
         - application/json
@@ -68,7 +68,7 @@ paths:
   /env/{env_name}:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Gets the environment variable value from the environment
       produces:
         - application/json
@@ -94,7 +94,7 @@ paths:
   /ping:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Ping endpoint which replies with pong
       produces:
         - application/json
@@ -111,7 +111,7 @@ paths:
   /about:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Information about the application
       produces:
         - application/json
@@ -128,7 +128,7 @@ paths:
   /render/{template}/{variables}:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Jinja2 render 
       description: Gets the rendered output from template and variable files
       produces:
@@ -160,7 +160,7 @@ paths:
             $ref: "#/definitions/ApiResponse"
     post:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: jinja2 render where env vars can be inserted
       consumes:
         - application/json
@@ -201,7 +201,7 @@ paths:
   /test/{id}:
     post:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Starts the tests / commands in detached mode and sequentially
       consumes:
         - text/plain
@@ -235,7 +235,7 @@ paths:
   /test:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Gets information about running tests, running processes, test status
       produces:
         - application/json
@@ -255,7 +255,7 @@ paths:
             $ref: "#/definitions/ApiResponse"
     delete:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Stops all commands/tests previously started
       produces:
         - application/json
@@ -276,7 +276,7 @@ paths:
   /file:
     put:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Uploads a file no mater the format. Binary or raw
       consumes:
         - application/json
@@ -309,7 +309,7 @@ paths:
             $ref: "#/definitions/ApiResponse"
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Gets the content of the file
       consumes:
         - application/json
@@ -338,7 +338,7 @@ paths:
   /folder:
     get:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Gets the folder as zip archive. Useful to get test results folder
       consumes:
         - application/json
@@ -367,7 +367,7 @@ paths:
   /command:
     post:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Starts multiple commands in blocking mode, but executed sequentially. Set the client timeout at needed value.
       consumes:
         - text/plain
@@ -396,7 +396,7 @@ paths:
   /commandparallel:
     post:
       tags:
-        - estuary-testrunner
+        - estuary-agent
       summary: Starts multiple commands in blocking mode, but executed in parallel. Set the client timeout at needed value.
       consumes:
         - text/plain
@@ -460,5 +460,5 @@ definitions:
         cat config.json
 externalDocs:
   description: Find out more on github
-  url: https://github.com/dinuta/estuary-testrunner
+  url: https://github.com/dinuta/estuary-agent
 '''

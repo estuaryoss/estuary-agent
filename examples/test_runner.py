@@ -22,6 +22,6 @@ if __name__ == '__main__':
     print(up_services)
 
     # step 2 - spread the tests across all services obtained at step 2. Use multi thread
-    # if using external SUT / dockerized SUT instruct each testrunner where to hit requests
+    # if using external SUT / dockerized SUT instruct each agent where to hit requests
     # can be used in docker-compose with estuary-deployer. TODO
     # TODO
