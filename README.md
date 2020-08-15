@@ -117,6 +117,47 @@ Then, access the Http Api. Call example:
   
     curl -i -H 'Token:mysecret' http:localhost:8080/about
 
+## Example output
+curl -X POST -d 'ls -lrt' http://localhost:8080/command
+
+```json
+{
+    "code": 1000,
+    "message": "Success",
+    "description": {
+        "finished": true,
+        "started": false,
+        "startedat": "2020-08-15 19:38:16.138962",
+        "finishedat": "2020-08-15 19:38:16.151067",
+        "duration": 0.012,
+        "pid": 2315,
+        "id": "none",
+        "commands": {
+            "ls -lrt": {
+                "status": "finished",
+                "details": {
+                    "out": "total 371436\n-rwxr-xr-x 1 dinuta qa  13258464 Jun 24 09:25 main-linux\ndrwxr-xr-x 4 dinuta qa        40 Jul  1 11:42 tmp\n-rw-r--r-- 1 dinuta qa  77707265 Jul 25 19:38 testrunner-linux.zip\n-rw------- 1 dinuta qa   4911271 Aug 14 10:00 nohup.out\n",
+                    "err": "",
+                    "code": 0,
+                    "pid": 6803,
+                    "args": [
+                        "/bin/sh",
+                        "-c",
+                        "ls -lrt"
+                    ]
+                },
+                "startedat": "2020-08-15 19:38:16.138970",
+                "finishedat": "2020-08-15 19:38:16.150976",
+                "duration": 0.012
+            }
+        }
+    },
+    "time": "2020-08-15 19:38:16.151113",
+    "name": "estuary-agent",
+    "version": "4.0.7"
+}
+```
+
 ## Estuary stack
 [Estuary deployer](https://github.com/dinuta/estuary-deployer)  
 [Estuary agent](https://github.com/dinuta/estuary-agent)  
