@@ -3,7 +3,7 @@ swagger_file_content = '''
 info:
   description: |
     Estuary agent which will run your shell commands via REST API
-  version: "4.0.7"
+  version: "4.0.8"
   title: estuary-agent
   termsOfService: http://swagger.io/terms/
   contact:
@@ -198,11 +198,11 @@ paths:
           description: jinja2 templating failure
           schema:
             $ref: "#/definitions/ApiResponse"
-  /test/{id}:
+  /commanddetached/{id}:
     post:
       tags:
         - estuary-agent
-      summary: Starts the tests / commands in detached mode and sequentially
+      summary: Starts the commands in detached mode and sequentially
       consumes:
         - text/plain
       produces:
@@ -214,7 +214,7 @@ paths:
         required: false
       - name: id
         in: path
-        description: Test id set by the user
+        description: Command detached id set by the user
         required: true
         type: string
       - name: test_file_content
@@ -232,11 +232,11 @@ paths:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
-  /test:
+  /commanddetached:
     get:
       tags:
         - estuary-agent
-      summary: Gets information about running tests, running processes, test status
+      summary: Gets information about running detached commands, running processes, test status
       produces:
         - application/json
       parameters:
@@ -246,17 +246,17 @@ paths:
         required: false
       responses:
         200:
-          description: Get test info response
+          description: Get command detached info response
           schema:
             $ref: "#/definitions/ApiResponse"
         404:
-          description: Get test info failure
+          description: Get command detached info failure
           schema:
             $ref: "#/definitions/ApiResponse"
     delete:
       tags:
         - estuary-agent
-      summary: Stops all commands/tests previously started
+      summary: Stops all detached commands previously started
       produces:
         - application/json
       parameters:
@@ -266,11 +266,11 @@ paths:
         required: false
       responses:
         200:
-          description: test stop response
+          description: command detached stop success
           schema:
             $ref: "#/definitions/ApiResponse"
         404:
-          description: test stop failure
+          description: command detached stop failure
           schema:
             $ref: "#/definitions/ApiResponse"
   /file:

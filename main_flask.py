@@ -3,12 +3,13 @@ import multiprocessing
 import os
 from pathlib import Path
 
-from rest.api import EurekaRegistrator
 from rest.api.constants.env_constants import EnvConstants
-from rest.api.definitions import test_info_init
-from rest.api.logginghelpers.message_dumper import MessageDumper
+from rest.api.constants.env_init import EnvInit
+from rest.api.definitions import command_detached_init
+from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.routes import app
 from rest.api.routes import fluentd_utils
+from rest.service.eureka import Eureka
 from rest.utils.env_startup import EnvStartup
 from rest.utils.io_utils import IOUtils
 
@@ -17,24 +18,23 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
 
     host = '0.0.0.0'
-    port = EnvStartup.get_instance().get("port")
+    port = EnvStartup.get_instance().get(EnvConstants.PORT)
     fluentd_tag = "startup"
-    variables = "testinfo.json"
     message_dumper = MessageDumper()
     io_utils = IOUtils()
 
-    if EnvStartup.get_instance().get("eureka_server"):
-        EurekaRegistrator(EnvStartup.get_instance().get("eureka_server")).register_app(
-            EnvStartup.get_instance().get("app_ip_port"))
+    if EnvStartup.get_instance().get(EnvConstants.EUREKA_SERVER):
+        Eureka(EnvStartup.get_instance().get(EnvConstants.EUREKA_SERVER)).register_app(
+            EnvStartup.get_instance().get(EnvConstants.APP_IP_PORT))
 
-    io_utils.create_dir(Path(EnvConstants.TEMPLATES_PATH))
-    io_utils.create_dir(Path(EnvConstants.VARIABLES_PATH))
+    io_utils.create_dir(Path(EnvInit.TEMPLATES_DIR))
+    io_utils.create_dir(Path(EnvInit.VARS_DIR))
 
-    file = EnvConstants.VARIABLES_PATH + "/" + variables
+    file = EnvInit.VARS_DIR + "/" + EnvInit.COMMAND_DETACHED_FILENAME
 
     try:
-        test_info_init["pid"] = os.getpid()
-        io_utils.write_to_file_dict(Path(file), test_info_init)
+        command_detached_init["pid"] = os.getpid()
+        io_utils.write_to_file_dict(Path(file), command_detached_init)
     except Exception as e:
         raise e
 

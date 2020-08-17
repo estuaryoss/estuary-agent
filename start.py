@@ -2,13 +2,14 @@
 import json
 import sys
 
+from rest.api.command.command import Command
+from rest.api.constants.env_init import EnvInit
 from rest.utils.io_utils import IOUtils
-from rest.utils.testrunner import TestRunner
 
 if __name__ == '__main__':
     io_utils = IOUtils()
-    command_logger_path = "testinfologger.txt"
-    file_path = "testinfo.json"
+    command_logger_path = "commandinfologger.txt"
+    file_path = EnvInit.COMMAND_DETACHED_FILENAME
 
     io_utils.append_to_file(command_logger_path, " ".join(sys.argv[:-1]) + f" \"{sys.argv[-1]}\"")
 
@@ -20,7 +21,7 @@ if __name__ == '__main__':
     test_id = sys.argv[1]
     commands_list = sys.argv[2].split(";")
 
-    test_runner = TestRunner()
+    test_runner = Command()
     dictionary = test_runner.run_commands(file_path, test_id, commands_list)
     dictionary = io_utils.read_dict_from_file(file_path)
 

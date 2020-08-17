@@ -18,13 +18,13 @@ from tests.rest_win.error_codes import ErrorCodes
 class FlaskServerTestCase(unittest.TestCase):
     server = "http://127.0.0.1:8080"
 
-    expected_version = "4.0.7"
+    expected_version = "4.0.8"
 
     def setUp(self):
-        requests.delete(self.server + "/test")
+        requests.delete(self.server + "/commanddetached")
 
     def tearDown(self):
-        requests.delete(self.server + "/test")
+        requests.delete(self.server + "/commanddetached")
 
     def test_env_endpoint(self):
         response = requests.get(self.server + "/env")
@@ -35,7 +35,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_ping_endpoint(self):
         response = requests.get(self.server + "/ping")
@@ -47,7 +48,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description'), "pong")
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
         self.assertEqual(len(headers.get('X-Request-ID')), 16)
 
     def test_getenv_endpoint_p(self):
@@ -60,7 +62,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('message'))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_getenv_endpoint_n(self):
         env_var = "alabalaportocala"
@@ -72,7 +75,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_ENV_VAR_FAILURE) % env_var.upper())
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.GET_ENV_VAR_FAILURE)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_about_endpoint_xid_sent_is_the_same(self):
         xid = "anaaremere"
@@ -87,7 +91,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
         self.assertEqual(headers.get('X-Request-ID'), xid)
 
     def test_about_endpoint_unauthorized(self):
@@ -102,7 +107,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UNAUTHORIZED))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.UNAUTHORIZED)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
         self.assertEqual(len(headers.get('X-Request-ID')), 16)
 
     @unittest.skipIf(platform.system() == "Windows", "Skip on Win")
@@ -212,7 +218,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_FILE_FAILURE))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.GET_FILE_FAILURE)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
         self.assertEqual(len(headers.get('X-Request-ID')), 16)
 
     def test_getfolder_header_missing_n(self):
@@ -228,7 +235,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_getfolder_p(self):
         utils = Utils()
@@ -264,7 +272,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.FOLDER_ZIP_FAILURE)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_getfolder_folder_not_found_n(self):
         container_folder = '/dummy'
@@ -283,7 +292,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.FOLDER_ZIP_FAILURE)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_getfolder_folder_param_missing_n(self):
         header_key = 'Folder-Path'
@@ -300,7 +310,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
         "ping -n 1 127.0.0.1 \n ping -n 2 127.0.0.1 \n ping -n 3 127.0.0.1", "mvn -h", "alabalaportocala"
@@ -310,7 +321,7 @@ class FlaskServerTestCase(unittest.TestCase):
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
-            self.server + f"/test/{test_id}",
+            self.server + f"/commanddetached/{test_id}",
             data=payload, headers=headers)
 
         body = response.json()
@@ -320,7 +331,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('description'), test_id)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
         "", "  "
@@ -330,7 +342,7 @@ class FlaskServerTestCase(unittest.TestCase):
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
-            self.server + f"/test/{test_id}",
+            self.server + f"/commanddetached/{test_id}",
             data=payload, headers=headers)
 
         body = response.json()
@@ -341,7 +353,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
         "4"
@@ -353,7 +366,7 @@ class FlaskServerTestCase(unittest.TestCase):
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
-            self.server + f"/test/{test_id}",
+            self.server + f"/commanddetached/{test_id}",
             data=f"{data_payload}", headers=headers)
 
         body = response.json()
@@ -361,7 +374,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description'), test_id)
 
         time.sleep(1)
-        response = requests.get(self.server + "/test")
+        response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description').get('id'), test_id)
@@ -374,7 +387,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "scheduled")
 
         time.sleep(int(payload) - 2)
-        response = requests.get(self.server + "/test")
+        response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
         self.assertNotEqual(body.get('description').get("commands").get(commands[0]).get('startedat'), "none")
@@ -383,7 +396,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details"),
                               dict)  # is empty because the details are filled after exec
         time.sleep(int(payload) + 2)
-        response = requests.get(self.server + "/test")
+        response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description').get('id'), test_id)
@@ -420,7 +433,7 @@ class FlaskServerTestCase(unittest.TestCase):
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
-            self.server + f"/test/{test_id}",
+            self.server + f"/commanddetached/{test_id}",
             data=f"{data_payload}", headers=headers)
 
         body = response.json()
@@ -428,7 +441,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description'), test_id)
         start = time.time()
         for i in range(1, repetitions):
-            response = requests.get(self.server + "/test")
+            response = requests.get(self.server + "/commanddetached")
             self.assertEqual(response.status_code, 200)
         end = time.time()
         print(f"made {repetitions} gettestinfo repetitions in {end - start} s")
@@ -439,17 +452,17 @@ class FlaskServerTestCase(unittest.TestCase):
         commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
         headers = {'Content-type': 'text/plain'}
 
-        response = requests.delete(self.server + "/test")
+        response = requests.delete(self.server + "/commanddetached")
         self.assertEqual(response.status_code, 200)
 
         response = requests.post(
-            self.server + f"/test/{test_id}",
+            self.server + f"/commanddetached/{test_id}",
             data=f"{data_payload}", headers=headers)
         body = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), test_id)
         time.sleep(4)
-        response = requests.get(self.server + "/test")
+        response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(body.get('description').get("id"), test_id)
         self.assertEqual(body.get('description').get("started"), True)
@@ -458,12 +471,12 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "scheduled")
         self.assertEqual(body.get('description').get("commands").get(commands[2]).get("status"), "scheduled")
         time.sleep(2)
-        response = requests.delete(self.server + "/test")
+        response = requests.delete(self.server + "/commanddetached")
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertEqual(body.get('description'), test_id)
 
-        response = requests.get(self.server + "/test")
+        response = requests.get(self.server + "/commanddetached")
         self.assertEqual(response.status_code, 200)
         body = response.json()
         # self.assertEqual(body.get('description').get("finished"), True)
@@ -487,7 +500,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % mandatory_header_key)
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
         ""
@@ -508,7 +522,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
         "{\"file\": \"/tmp/config.properties\", \"content\": \"ip=10.0.0.1\\nrequest_sec=100\\nthreads=10\\ntype=dual\"}"
@@ -529,7 +544,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_n(self):
         command = "abracadabra"  # not working on linux
@@ -547,7 +563,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIn("is not recognized as an internal or external command",
                       body.get('description').get('commands').get(command).get('details').get('err'))
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "")
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_p(self):
         command = "type requirements.txt"
@@ -567,7 +584,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_java_isinstalled_p(self):
         command = "java -version"
@@ -588,7 +606,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          body.get('description').get('commands').get(command).get('details').get('err'))
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_grep_things_p(self):
         file = "main_flask.py"
@@ -609,7 +628,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_cmds_sep_by_andand_p(self):
         command = "echo 1 && echo 2"
@@ -629,7 +649,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_grep_and_out_redirect_p(self):
         file = "whatever.txt"
@@ -655,7 +676,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(commands[1]).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(commands[1]).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('details').get('args'), list)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_sum_seq_p(self):
         a = 2
@@ -673,7 +695,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(round(int(body.get('description').get('duration'))), a + b - 2)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_sum_parallel_p(self):
         a = 2
@@ -691,7 +714,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(round(int(body.get('description').get('duration'))), b - 1)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_arg_with_spaces(self):
         raw_cmd = "java -cp whatever.jar com.java.org -cmd my_cmd -args \"a;b c d;e\""
@@ -709,7 +733,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          len(shlex_cmd))
         self.assertEqual(body.get('description').get('commands').get(raw_cmd).get('details').get('args')[-1],
                          shlex_cmd[-1])
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executetest_sum_seq_p(self):
         test_id = "test_executetest_sum_seq_p"
@@ -717,11 +742,11 @@ class FlaskServerTestCase(unittest.TestCase):
         b = 3
         commands = ["ping -n {} 127.0.0.1".format(a), "ping -n {} 127.0.0.1".format(b)]
 
-        response = requests.post(self.server + "/test/{}".format(test_id), data="\n".join(commands))
+        response = requests.post(self.server + "/commanddetached/{}".format(test_id), data="\n".join(commands))
         self.assertEqual(response.status_code, 200)
         time.sleep(a + b + 1)
 
-        response = requests.get(self.server + f"/test")
+        response = requests.get(self.server + f"/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
 
@@ -735,7 +760,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('duration'), float)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
         self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('duration'), float)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_timeout_from_client_n(self):
         command = "ping -n 20 127.0.0.1"
@@ -759,7 +785,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_setenv_endpoint_jsonwithvalues_p(self):
         payload = {"a": "b"}
@@ -773,7 +800,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_setenv_endpoint_notjson_n(self):
         payload = "whateverinvalid"
@@ -787,7 +815,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_JSON_PAYLOAD) % payload)
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_JSON_PAYLOAD)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
     def test_setenv_endpoint_namenotset_n(self):
         payload = json.dumps("whateverinvalid")
@@ -801,7 +830,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SET_ENV_VAR_FAILURE) % payload)
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SET_ENV_VAR_FAILURE)
-        self.assertIsNotNone(body.get('time'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
 
 
 if __name__ == '__main__':

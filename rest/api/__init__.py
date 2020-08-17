@@ -4,7 +4,6 @@ from flask import Flask
 from flask_cors import CORS
 
 from rest.api.definitions import swaggerui_blueprint, SWAGGER_URL
-from rest.api.eureka_registrator import EurekaRegistrator
 from rest.api.flask_config import Config
 
 

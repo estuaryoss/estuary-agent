@@ -3,15 +3,15 @@ import platform
 import shlex
 from multiprocessing import Process, Manager
 
-from rest.api.definitions import test_info_init
+from rest.api.definitions import command_detached_init
 from rest.utils.cmd_utils import CmdUtils
 from rest.utils.io_utils import IOUtils
 
 
-class TestRunnerParallel:
+class CommandInParallel:
 
     def __init__(self):
-        self.command_dict = test_info_init
+        self.command_dict = command_detached_init
         self.__cmd_utils = CmdUtils()
         self.__io_utils = IOUtils()
 

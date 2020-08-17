@@ -1,11 +1,11 @@
-from rest.api.logginghelpers.message_dumper import MessageDumper
-from rest.utils.fluentd_utils import FluentdUtils
+from rest.api.loghelpers.message_dumper import MessageDumper
+from rest.service.fluentd import Fluentd
 
 
 class ProcessUtils:
     def __init__(self, logger):
         self.logger = logger
-        self.fluentd_utils = FluentdUtils(logger)
+        self.fluentd_utils = Fluentd(logger)
         self.message_dumper = MessageDumper()
 
     def on_terminate(self, proc):

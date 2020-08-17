@@ -20,7 +20,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     },
 )
 
-test_info_init = {
+command_detached_init = {
     "finished": False,
     "started": False,
     "startedat": str(datetime.datetime.now()),
