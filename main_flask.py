@@ -30,7 +30,7 @@ if __name__ == "__main__":
     io_utils.create_dir(Path(EnvInit.TEMPLATES_DIR))
     io_utils.create_dir(Path(EnvInit.VARS_DIR))
 
-    file = EnvInit.VARS_DIR + "/" + EnvInit.COMMAND_DETACHED_FILENAME
+    file = EnvInit.COMMAND_DETACHED_FILENAME
 
     try:
         command_detached_init["pid"] = os.getpid()
