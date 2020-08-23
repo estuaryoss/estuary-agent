@@ -29,24 +29,12 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 [Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe?version=latest)
 
 ## General use cases:
--  remote shell command executor 
--  expose CLI app through REST API 
--  test execution, getting results ...
-
-## Container support
--  mvn & java jdk  
--  make  
--  npm
--  other: you can use this image as base and install on top your dependencies 
-
-## Agent service usage
-1. use the docker image and mount your testing framework
-2. build your absolute custom framework image and add this agent compiled as binary. Read [doc](https://github.com/dinuta/estuary-agent/wiki).
+- remote command executor
+- exposing CLI app through REST API
+- controlling the test automation framework (maven/python, etc)
+- integration testing by controlling and configuring the SUT
 
 ## Testing use cases:
-1. agent used for integration testing controlling SUT / dockerized SUT
-2. agent used inside a docker-compose template with estuary-deployer, to control the automation framework
-
 Some use cases are documented in [wiki](https://github.com/dinuta/estuary-agent/wiki)
 
 ## Service run
