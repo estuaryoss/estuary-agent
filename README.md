@@ -28,6 +28,9 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 ## Postman collection
 [Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe?version=latest)
 
+## Katacoda playground
+[estuary-agent](https://katacoda.com/dinuta/scenarios/estuary-agent)
+
 ## General use cases:
 - remote command executor
 - exposing CLI app through REST API
