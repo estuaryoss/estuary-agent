@@ -1,7 +1,7 @@
 FROM alpine:3.11
 
 RUN apk add --no-cache python3 && \
-    pip3 install --upgrade pip==20.1.1 setuptools==46.2.0 --no-cache
+    pip3 install --upgrade pip==20.2.3 setuptools==46.2.0 --no-cache
 
 RUN apk add --no-cache \
     bash \
@@ -35,12 +35,6 @@ ENV TEMPLATES_DIR $WORKSPACE/templates
 ENV VARS_DIR $WORKSPACE/variables
 ENV HTTP_AUTH_TOKEN None
 ENV PORT 8080
-
-
-ENV OUT_DIR out
-ENV TEMPLATE docker-compose.j2
-ENV VARIABLES variables.yml
-
 ENV TZ UTC
 
 COPY ./ $SCRIPTS_DIR/

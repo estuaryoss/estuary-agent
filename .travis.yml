@@ -24,7 +24,7 @@ jobs:
       before_script:
         - py.test $SCRIPTS_DIR/render_test.py --cov=entities
       script:
-        - python3 -m unittest discover $SCRIPTS_DIR "render_test.py"
+        - python3 -m unittest discover . "render_test.py"
       after_script:
         - coveralls
 
@@ -46,7 +46,7 @@ jobs:
           dinutac/estuary-agent:latest
       script:
         - docker exec estuary-agent python3 -m unittest discover /scripts/tests/rest *_test.py
-        - docker exec estuary-agent python3 -m unittest discover /scripts/tests/rest "render_test.py"
+        - docker exec estuary-agent python3 -m unittest discover /scripts/ "render_test.py"
 
       #run executable tests. exec with pyinstaller
     - language: python
@@ -102,22 +102,6 @@ jobs:
         #  - ./ngrok.sh
         #  - sleep 3600
         - python3 -m unittest discover tests/rest "*_test.py"
-
-        #run templating tests
-    - language: python
-      services: docker
-      env:
-        ISOLATED: true
-        DOCKER_SCRIPTS_DIR: /scripts
-      before_script:
-        - docker build -t dinutac/estuary-agent:latest -f Dockerfile .
-      script:
-        #check template render
-        - docker run -i
-          -v $TRAVIS_BUILD_DIR/inputs/templates:/scripts/inputs/templates
-          -v $TRAVIS_BUILD_DIR/inputs/variables:/scripts/inputs/variables  -e TEMPLATE=standalone.yml
-          -e VARIABLES=variables.yml -e DATABASE=mysql56 -e IMAGE=latest --entrypoint python3 dinutac/estuary-agent:latest
-          $DOCKER_SCRIPTS_DIR/entities/render.py
 
     - language: python
       services:

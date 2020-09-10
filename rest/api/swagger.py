@@ -84,11 +84,7 @@ paths:
         type: string
       responses:
         200:
-          description: Get env var response
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        404:
-          description: Get env var failure
+          description: Get env var value
           schema:
             $ref: "#/definitions/ApiResponse"
   /ping:

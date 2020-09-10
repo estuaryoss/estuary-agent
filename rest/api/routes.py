@@ -11,7 +11,6 @@ from flask import request
 from fluent import sender
 
 from about import properties
-from entities.render import Render
 from rest.api import create_app
 from rest.api.command.command_in_memory import CommandInMemory
 from rest.api.command.command_in_parallel import CommandInParallel
@@ -19,11 +18,13 @@ from rest.api.constants.api_code_constants import ApiCodeConstants
 from rest.api.constants.env_constants import EnvConstants
 from rest.api.constants.env_init import EnvInit
 from rest.api.constants.header_constants import HeaderConstants
-from rest.api.definitions import command_detached_init, unmodifiable_env_vars
+from rest.api.definitions import command_detached_init
+from rest.api.jinja2.render import Render
 from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.responsehelpers.error_codes import ErrorCodes
 from rest.api.responsehelpers.http_response import HttpResponse
 from rest.api.swagger import swagger_file_content
+from rest.environment.environment import Environment
 from rest.service.fluentd import Fluentd
 from rest.utils.cmd_utils import CmdUtils
 from rest.utils.env_startup import EnvStartup
@@ -38,6 +39,7 @@ logger = \
         if EnvStartup.get_instance().get(EnvConstants.FLUENTD_IP_PORT) else None
 fluentd_utils = Fluentd(logger)
 message_dumper = MessageDumper()
+env = Environment.get_instance()
 
 
 @app.before_request
@@ -95,7 +97,7 @@ def get_vars():
     http = HttpResponse()
     return Response(json.dumps(
         http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                      description=dict(os.environ))),
+                      description=env.get_env_and_virtual_env())),
         200, mimetype="application/json")
 
 
@@ -123,20 +125,20 @@ def about():
 
 @app.route('/render/<template>/<variables>', methods=['GET', 'POST'])
 def get_content_with_env(template, variables):
+    http = HttpResponse()
+    env.set_env_var(EnvConstants.TEMPLATE, template.strip())
+    env.set_env_var(EnvConstants.VARIABLES, variables.strip())
+
     try:
-        input_json = request.get_json(force=True)
-        for key, value in input_json.items():
-            if key not in unmodifiable_env_vars:
-                os.environ[key] = value
+        env_vars_attempted = request.get_json(force=True)
+        for key, value in env_vars_attempted.items():
+            env.set_env_var(key, value)
     except:
         pass
 
-    os.environ[EnvConstants.TEMPLATE] = template.strip()
-    os.environ[EnvConstants.VARIABLES] = variables.strip()
-
-    http = HttpResponse()
     try:
-        r = Render(os.environ[EnvConstants.TEMPLATE], os.environ[EnvConstants.VARIABLES])
+        r = Render(env.get_env_and_virtual_env().get(EnvConstants.TEMPLATE),
+                   env.get_env_and_virtual_env().get(EnvConstants.VARIABLES))
         response = Response(r.rend_template(), 200, mimetype="text/plain")
     except Exception as e:
         response = Response(json.dumps(http.response(code=ApiCodeConstants.JINJA2_RENDER_FAILURE,
@@ -180,9 +182,10 @@ def get_command_detached_info():
 def set_env():
     http = HttpResponse()
     input_data = request.data.decode("UTF-8", "replace").strip()
+    env_vars_added = {}
 
     try:
-        input_json = json.loads(input_data)
+        env_vars_attempted = json.loads(input_data)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.INVALID_JSON_PAYLOAD,
                                                  message=ErrorCodes.HTTP_CODE.get(
@@ -192,9 +195,10 @@ def set_env():
                         mimetype="application/json")
 
     try:
-        for key, value in input_json.items():
-            if key not in unmodifiable_env_vars:
-                os.environ[key] = value
+        for key, value in env_vars_attempted.items():
+            env.set_env_var(key, value)
+
+        env_vars_added = {key: value for key, value in env_vars_attempted.items() if key in env.get_virtual_env()}
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.SET_ENV_VAR_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
@@ -204,7 +208,8 @@ def set_env():
                         mimetype="application/json")
     return Response(
         json.dumps(
-            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), input_json)),
+            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          env_vars_added)),
         200,
         mimetype="application/json")
 
@@ -213,18 +218,11 @@ def set_env():
 def get_env(name):
     name = name.upper().strip()
     http = HttpResponse()
-    try:
-        response = Response(json.dumps(
-            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                          os.environ[name])), 200,
-            mimetype="application/json")
-    except Exception as e:
-        response = Response(json.dumps(http.response(code=ApiCodeConstants.GET_ENV_VAR_FAILURE,
-                                                     message=ErrorCodes.HTTP_CODE.get(
-                                                         ApiCodeConstants.GET_ENV_VAR_FAILURE) % name,
-                                                     description="Exception({})".format(e.__str__()))), 404,
-                            mimetype="application/json")
-    return response
+
+    return Response(json.dumps(
+        http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                      env.get_env_and_virtual_env().get(name))), 200,
+        mimetype="application/json")
 
 
 @app.route('/commanddetached/<command_id>', methods=['POST', 'PUT'])
@@ -232,8 +230,8 @@ def command_detached_start(command_id):
     command_id = command_id.strip()
     variables = EnvInit.COMMAND_DETACHED_FILENAME
     start_py_path = str(Path(".").absolute()) + "/start.py"
-    os.environ[EnvConstants.TEMPLATE] = "start.py"
-    os.environ[EnvConstants.VARIABLES] = variables
+    env.set_env_var(EnvConstants.TEMPLATE, "start.py")
+    env.set_env_var(EnvConstants.VARIABLES, variables)
     command = []
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
@@ -400,8 +398,8 @@ def command_detached_stop():
 
 @app.route('/command', methods=['POST', 'PUT'])
 def execute_command():
-    os.environ[EnvConstants.TEMPLATE] = "start.py"
-    os.environ[EnvConstants.VARIABLES] = "commandinfo.json"
+    env.set_env_var(EnvConstants.TEMPLATE, "start.py")
+    env.set_env_var(EnvConstants.VARIABLES, "commandinfo.json")
     http = HttpResponse()
     input_data = request.data.decode("UTF-8", "replace").strip()
 
@@ -434,8 +432,8 @@ def execute_command():
 
 @app.route('/commandparallel', methods=['POST', 'PUT'])
 def execute_command_parallel():
-    os.environ[EnvConstants.TEMPLATE] = "start.py"
-    os.environ[EnvConstants.VARIABLES] = "commandinfo.json"
+    env.set_env_var(EnvConstants.TEMPLATE, "start.py")
+    env.set_env_var(EnvConstants.VARIABLES, "commandinfo.json")
     http = HttpResponse()
     input_data = request.data.decode("UTF-8", "replace").strip()
 

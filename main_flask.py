@@ -9,6 +9,7 @@ from rest.api.definitions import command_detached_init
 from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.routes import app
 from rest.api.routes import fluentd_utils
+from rest.environment.environment import Environment
 from rest.service.eureka import Eureka
 from rest.utils.env_startup import EnvStartup
 from rest.utils.io_utils import IOUtils
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     except Exception as e:
         raise e
 
-    environ_dump = message_dumper.dump_message(dict(os.environ))
+    environ_dump = message_dumper.dump_message(Environment.get_instance().get_env_and_virtual_env())
     ip_port_dump = message_dumper.dump_message({"host": host, "port": port})
 
     app.logger.debug({"msg": environ_dump})

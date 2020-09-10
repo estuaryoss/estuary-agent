@@ -70,11 +70,12 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + "/env/" + env_var)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
-                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_ENV_VAR_FAILURE) % env_var.upper())
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get("description"), None)
         self.assertEqual(body.get('version'), self.expected_version)
-        self.assertEqual(body.get('code'), ApiCodeConstants.GET_ENV_VAR_FAILURE)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -455,6 +456,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.delete(self.server + "/commanddetached")
         self.assertEqual(response.status_code, 200)
 
+        time.sleep(3)
         response = requests.post(
             self.server + f"/commanddetached/{test_id}",
             data=f"{data_payload}", headers=headers)
@@ -797,6 +799,21 @@ class FlaskServerTestCase(unittest.TestCase):
         body = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), payload)
+        self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    def test_setenv_endpoint_jsonwithvalues_existing_env_p(self):
+        payload = {"PATH": "b"}
+        headers = {'Content-type': 'application/json'}
+
+        response = requests.post(self.server + f"/env", data=json.dumps(payload),
+                                 headers=headers)
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description'), {})
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)

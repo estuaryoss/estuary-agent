@@ -108,6 +108,12 @@ Then, access the Http Api. Call example:
   
     curl -i -H 'Token:mysecret' http:localhost:8080/about
 
+## Environment variables injection
+User defined environment variables will be stored in a 'virtual' environment. The extra env vars will be used by the process that executes system commands.  
+Call POST on **/env** endpoint. The body will contain the env vars in JSON format. E.g. {"FOO1":"BAR1"}  
+
+*! All environment variables described above can also be set using the method described above.*
+
 ## Example output
 curl -X POST -d 'ls -lrt' http://localhost:8080/command
 

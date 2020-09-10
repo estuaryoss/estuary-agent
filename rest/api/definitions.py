@@ -1,14 +1,6 @@
 import datetime
-import os
 
 from flask_swagger_ui import get_swaggerui_blueprint
-
-unmodifiable_env_vars = {
-    "TEMPLATES_DIR": os.environ.get('TEMPLATES_DIR'),
-    "VARS_DIR": os.environ.get('VARS_DIR'),
-    "PORT": os.environ.get('PORT'),
-    "WORKSPACE": os.environ.get('WORKSPACE')
-}
 
 SWAGGER_URL = '/api/docs'
 
