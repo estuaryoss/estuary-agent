@@ -18,7 +18,7 @@ from tests.rest_win.error_codes import ErrorCodes
 class FlaskServerTestCase(unittest.TestCase):
     server = "http://127.0.0.1:8080"
 
-    expected_version = "4.0.8"
+    expected_version = "4.0.9"
 
     def setUp(self):
         requests.delete(self.server + "/commanddetached")
