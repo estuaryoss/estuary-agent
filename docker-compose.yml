@@ -3,7 +3,7 @@ version: "3.3"
 services:
   estuary-agent:
     container_name: estuary-agent
-    image: dinutac/estuary-agent:latest
+    image: estuaryoss/agent:latest
     hostname: estuary-agent
     #    entrypoint: tail -f /etc/alpine-release
     command: bash -c "sleep 20 && /scripts/main_flask.py"
@@ -25,7 +25,7 @@ services:
 
   eureka-server:
     container_name: eureka-server
-    image: dinutac/netflixoss-eureka:1.9.21
+    image: estuaryoss/netflix-eureka:1.9.25
     hostname: eureka-server
 #    ports:
 #      - "8081:8080"

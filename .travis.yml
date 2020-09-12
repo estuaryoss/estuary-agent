@@ -35,13 +35,13 @@ jobs:
         SCRIPTS_DIR: tests
         ISOLATED: true
       before_install:
-        - docker build -t dinutac/estuary-agent:latest -f Dockerfile .
+        - docker build -t estuaryoss/agent:latest -f Dockerfile .
         - chmod +x ngrok.sh
         - docker run
           -d
           -p 8080:8080
           --name estuary-agent
-          dinutac/estuary-agent:latest
+          estuaryoss/agent:latest
       script:
         - docker exec estuary-agent python3 -m unittest discover /scripts/tests/rest *_test.py
         - docker exec estuary-agent python3 -m unittest discover /scripts/ "render_test.py"
@@ -89,12 +89,12 @@ jobs:
         - cp dist/main_flask main-linux
         - cp dist/start start.py-linux
       script:
-        - docker build -t dinutac/estuary-agent-centos:latest -f Dockerfiles/Dockerfile_centos .
+        - docker build -t estuaryoss/agent-centos:latest -f Dockerfiles/Dockerfile_centos .
         - docker run
           -d
           -p 8080:8080
           --name estuary-agent-centos
-          dinutac/estuary-agent-centos:latest
+          estuaryoss/agent-centos:latest
         - sleep 5
         - docker logs estuary-agent-centos
         #  - ./ngrok.sh
@@ -109,7 +109,7 @@ jobs:
         DOCKER_SCRIPTS_DIR: /scripts
         ISOLATED: true
       before_script:
-        - docker build -t dinutac/estuary-agent:latest -f Dockerfile .
+        - docker build -t estuaryoss/agent:latest -f Dockerfile .
       script:
         #run eureka registration tests
         - docker-compose up -d

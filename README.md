@@ -2,25 +2,23 @@
 
 Support project: <a href="https://paypal.me/catalindinuta?locale.x=en_US"><img src="https://lh3.googleusercontent.com/Y2_nyEd0zJftXnlhQrWoweEvAy4RzbpDah_65JGQDKo9zCcBxHVpajYgXWFZcXdKS_o=s180-rw" height="40" width="40" align="center"></a>    
 
-# Testing as a Service
-
 ## Estuary agent
 Estuary agent is a service that exposes your cli commands/app via REST API.
 
 ## Coverage and code quality
-[![Coverage Status](https://coveralls.io/repos/github/dinuta/estuary-testrunner/badge.svg?branch=master)](https://coveralls.io/github/dinuta/estuary-testrunner?branch=master)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/60f44f5ab65e46a1b3ed92db34398910)](https://www.codacy.com/manual/dinuta/estuary-agent?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dinuta/estuary-agent&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/591c1ea4057f8c7d92ee/maintainability)](https://codeclimate.com/github/dinuta/estuary-agent/maintainability)
+[![Coverage Status](https://coveralls.io/repos/github/estuaryoss/estuary-agent/badge.svg?branch=master)](https://coveralls.io/github/estuaryoss/estuary-agent?branch=master)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8876747a1c044d1cb855e4e652365c99)](https://www.codacy.com/gh/estuaryoss/estuary-agent?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=estuaryoss/estuary-agent&amp;utm_campaign=Badge_Grade)
+[![Maintainability](https://api.codeclimate.com/v1/badges/e993e853603af9dd0906/maintainability)](https://codeclimate.com/github/estuaryoss/estuary-agent/maintainability)
 
 ## Linux status
-[![Build Status](https://travis-ci.org/dinuta/estuary-agent.svg?branch=master)](https://travis-ci.org/dinuta/estuary-agent)
+[![Build Status](https://travis-ci.org/estuaryoss/estuary-agent.svg?branch=master)](https://travis-ci.org/estuaryoss/estuary-agent)
 
 ## Windows status
-[![CircleCI](https://circleci.com/gh/dinuta/estuary-agent.svg?style=svg)](https://circleci.com/gh/dinuta/estuary-agent)  
+[![CircleCI](https://circleci.com/gh/estuaryoss/estuary-agent.svg?style=svg)](https://circleci.com/gh/estuaryoss/estuary-agent)  
 
 ## Docker Hub
-[alpine](https://hub.docker.com/r/dinutac/estuary-agent)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-agent.svg)  
-[centos](https://hub.docker.com/r/dinutac/estuary-agent-centos)  ![](https://img.shields.io/docker/pulls/dinutac/estuary-agent-centos.svg)
+[alpine](https://hub.docker.com/r/estuaryoss/agent)  ![](https://img.shields.io/docker/pulls/estuaryoss/agent.svg)  
+[centos](https://hub.docker.com/r/estuaryoss/agent-centos)  ![](https://img.shields.io/docker/pulls/estuaryoss/agent-centos.svg)
 
 ## Api docs
 [4.0.8](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.0.8)
@@ -49,7 +47,7 @@ Some use cases are documented in [wiki](https://github.com/dinuta/estuary-agent/
     docker run  
     -d 
     -p 8080:8080
-    dinutac/estuary-agent:<tag>
+    estuaryoss/agent:<tag>
     
     
 ### Kubernetes
@@ -61,9 +59,7 @@ all services used for your test and then spread the tests across all.
 
 Start Eureka server with docker:
 
-    docker run -p 8080:8080 netflixoss/eureka:1.3.1
-    or
-    docker run -p 8080:8080 dinutac/netflixoss-eureka:1.9.21
+    docker run -p 8080:8080 estuaryoss/netflix-eureka:1.9.25
 
 Start your containers by specifying the full hostname or ip of the host machine on where your agent service resides.
 Optionally you can define the WORKSPACE (default=/tmp)or PORT (default=8080).
@@ -73,7 +69,7 @@ Optionally you can define the WORKSPACE (default=/tmp)or PORT (default=8080).
     -e APP_IP_PORT=10.10.15.28:8081 -> the ip and port of the app
     -e WORKSPACE=/tmp/ -> optional;for multiplatform set it to your needs;default is /tmp/;E.g /workspace/
     -p 8081:8080
-    dinutac/estuary-agent:<tag>
+    estuaryoss/agent:<tag>
 
 ### Fluentd logging
 Please consult [Fluentd](https://github.com/fluent/fluentd) for logging setup.  
@@ -92,7 +88,7 @@ Run example:
     docker run \
     -e FLUENTD_IP_PORT=10.10.15.28:24224
     -p 8080:8080
-    dinutac/estuary-agent:<tag>
+    estuaryoss/agent:<tag>
 
 ### Authentication
 For auth set HTTP_AUTH_TOKEN env variable.  
@@ -102,7 +98,7 @@ Run example:
     docker run \
     -e HTTP_AUTH_TOKEN=mysecret
     -p 8080:8080
-    dinutac/estuary-agent:<tag>
+    estuaryoss/agent:<tag>
 
 Then, access the Http Api. Call example:
   

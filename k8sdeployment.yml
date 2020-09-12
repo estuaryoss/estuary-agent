@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: estuary-agent
-          image: dinutac/estuary-agent:latest
+          image: estuaryoss/agent:latest
           command: ["bash", "-c", "sleep 30 && /scripts/main_flask.py"] #wait until eureka up
           env:
             - name: EUREKA_SERVER
@@ -63,7 +63,7 @@ spec:
     spec:
       containers:
         - name: netflixoss-eureka
-          image: dinutac/netflixoss-eureka:1.9.21
+          image: estuaryoss/netflix-eureka:1.9.25
 ---
 kind: Service
 apiVersion: v1
