@@ -97,6 +97,7 @@ def get_swagger():
 @app.route('/env')
 def get_vars():
     http = HttpResponse()
+
     return Response(json.dumps(
         http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
                       description=env.get_env_and_virtual_env())),
@@ -218,13 +219,11 @@ def set_env():
 
 @app.route('/env/<name>', methods=['GET'])
 def get_env(name):
-    name = name.upper().strip()
     http = HttpResponse()
 
     return Response(json.dumps(
         http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                      env.get_env_and_virtual_env().get(name))), 200,
-        mimetype="application/json")
+                      env.get_env_and_virtual_env().get(name))), 200, mimetype="application/json")
 
 
 @app.route('/commanddetached/<command_id>', methods=['POST', 'PUT'])
