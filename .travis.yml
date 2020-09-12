@@ -40,8 +40,6 @@ jobs:
         - docker run
           -d
           -p 8080:8080
-          -v $PWD/inputs/templates:/scripts/inputs/templates
-          -v $PWD/inputs/variables:/scripts/inputs/variables
           --name estuary-agent
           dinutac/estuary-agent:latest
       script:
@@ -82,6 +80,7 @@ jobs:
         ISOLATED: true
         NGROK_TOKEN: 1RER6BUC3QNNwYWY5LcIBjrv3A8_24QccmopTEQJGMErG9uzw
         SKIP_ON_VM: true
+        SKIP_ON_DOCKER: true
       before_script:
         - pip3 install -r requirements.txt
         - pyinstaller --onefile main_flask.py
@@ -90,15 +89,14 @@ jobs:
         - cp dist/main_flask main-linux
         - cp dist/start start.py-linux
       script:
-        - docker build -t dinutac/estuary-agent:latest -f Dockerfiles/Dockerfile_centos .
+        - docker build -t dinutac/estuary-agent-centos:latest -f Dockerfiles/Dockerfile_centos .
         - docker run
           -d
           -p 8080:8080
-          -v $PWD/inputs/templates:/scripts/inputs/templates
-          -v $PWD/inputs/variables:/scripts/inputs/variables
-          --name estuary-agent
-          dinutac/estuary-agent:latest
+          --name estuary-agent-centos
+          dinutac/estuary-agent-centos:latest
         - sleep 5
+        - docker logs estuary-agent-centos
         #  - ./ngrok.sh
         #  - sleep 3600
         - python3 -m unittest discover tests/rest "*_test.py"

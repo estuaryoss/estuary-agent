@@ -7,26 +7,25 @@ from rest.api.constants.env_constants import EnvConstants
 from rest.api.constants.env_init import EnvInit
 from rest.api.definitions import command_detached_init
 from rest.api.loghelpers.message_dumper import MessageDumper
-from rest.api.routes import app
-from rest.api.routes import fluentd_utils
-from rest.environment.environment import Environment
+from rest.api.routes import fluentd_utils, app
+from rest.environment.environment import EnvironmentSingleton
 from rest.service.eureka import Eureka
-from rest.utils.env_startup import EnvStartup
+from rest.utils.env_startup import EnvStartupSingleton
 from rest.utils.io_utils import IOUtils
 
 if __name__ == "__main__":
     # fix for pyinstaller
     multiprocessing.freeze_support()
 
-    host = '0.0.0.0'
-    port = EnvStartup.get_instance().get(EnvConstants.PORT)
-    fluentd_tag = "startup"
     message_dumper = MessageDumper()
     io_utils = IOUtils()
+    host = '0.0.0.0'
+    port = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT)
+    fluentd_tag = "startup"
 
-    if EnvStartup.get_instance().get(EnvConstants.EUREKA_SERVER):
-        Eureka(EnvStartup.get_instance().get(EnvConstants.EUREKA_SERVER)).register_app(
-            EnvStartup.get_instance().get(EnvConstants.APP_IP_PORT))
+    if EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.EUREKA_SERVER):
+        Eureka(EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.EUREKA_SERVER)).register_app(
+            EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.APP_IP_PORT))
 
     io_utils.create_dir(Path(EnvInit.TEMPLATES_DIR))
     io_utils.create_dir(Path(EnvInit.VARS_DIR))
@@ -39,12 +38,12 @@ if __name__ == "__main__":
     except Exception as e:
         raise e
 
-    environ_dump = message_dumper.dump_message(Environment.get_instance().get_env_and_virtual_env())
+    environ_dump = message_dumper.dump_message(EnvironmentSingleton.get_instance().get_env_and_virtual_env())
     ip_port_dump = message_dumper.dump_message({"host": host, "port": port})
 
     app.logger.debug({"msg": environ_dump})
     app.logger.debug({"msg": ip_port_dump})
-    app.logger.debug({"msg": EnvStartup.get_instance()})
+    app.logger.debug({"msg": EnvStartupSingleton.get_instance().get_config_env_vars()})
 
     fluentd_utils.emit(tag=fluentd_tag, msg=environ_dump)
 

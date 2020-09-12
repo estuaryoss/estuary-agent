@@ -1,10 +1,10 @@
 import subprocess
 
-from rest.environment.environment import Environment
+from rest.environment.environment import EnvironmentSingleton
 
 
 class CmdUtils:
-    __env = Environment.get_instance()
+    __env = EnvironmentSingleton.get_instance()
 
     @staticmethod
     def run_cmd_detached(command):

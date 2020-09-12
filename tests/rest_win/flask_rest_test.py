@@ -65,6 +65,22 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
+    @parameterized.expand([
+        ("FOO1", "BAR10"),
+        ("FOO2", "BAR20")
+    ])
+    def test_env_load_from_props(self, env_var, expected_value):
+        response = requests.get(self.server + "/env/" + env_var)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('description'), expected_value)
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
     def test_getenv_endpoint_n(self):
         env_var = "alabalaportocala"
         response = requests.get(self.server + "/env/" + env_var)
@@ -791,7 +807,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('path'))
 
     def test_setenv_endpoint_jsonwithvalues_p(self):
-        payload = {"a": "b"}
+        payload = {"a": "b", "FOO1": "BAR1"}
         headers = {'Content-type': 'application/json'}
 
         response = requests.post(self.server + f"/env", data=json.dumps(payload),

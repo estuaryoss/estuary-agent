@@ -11,7 +11,7 @@ from flask import request
 from fluent import sender
 
 from about import properties
-from rest.api import create_app
+from rest.api import AppCreatorSingleton
 from rest.api.command.command_in_memory import CommandInMemory
 from rest.api.command.command_in_parallel import CommandInParallel
 from rest.api.constants.api_code_constants import ApiCodeConstants
@@ -24,22 +24,24 @@ from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.responsehelpers.error_codes import ErrorCodes
 from rest.api.responsehelpers.http_response import HttpResponse
 from rest.api.swagger import swagger_file_content
-from rest.environment.environment import Environment
+from rest.environment.environment import EnvironmentSingleton
 from rest.service.fluentd import Fluentd
 from rest.utils.cmd_utils import CmdUtils
-from rest.utils.env_startup import EnvStartup
+from rest.utils.env_startup import EnvStartupSingleton
 from rest.utils.io_utils import IOUtils
 from rest.utils.process_utils import ProcessUtils
 
-app = create_app()
+app = AppCreatorSingleton.get_instance().get_app()
 logger = \
     sender.FluentSender(tag=properties.get('name'),
-                        host=EnvStartup.get_instance().get(EnvConstants.FLUENTD_IP_PORT).split(":")[0],
-                        port=int(EnvStartup.get_instance().get(EnvConstants.FLUENTD_IP_PORT).split(":")[1])) \
-        if EnvStartup.get_instance().get(EnvConstants.FLUENTD_IP_PORT) else None
+                        host=EnvStartupSingleton.get_instance().get_config_env_vars().get(
+                            EnvConstants.FLUENTD_IP_PORT).split(":")[0],
+                        port=int(EnvStartupSingleton.get_instance().get_config_env_vars().get(
+                            EnvConstants.FLUENTD_IP_PORT).split(":")[1])) \
+        if EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.FLUENTD_IP_PORT) else None
 fluentd_utils = Fluentd(logger)
 message_dumper = MessageDumper()
-env = Environment.get_instance()
+env = EnvironmentSingleton.get_instance()
 
 
 @app.before_request
@@ -58,7 +60,7 @@ def before_request():
     response = fluentd_utils.emit(tag="api", msg=message_dumper.dump(request=request))
     app.logger.debug(response)
     if not str(request.headers.get(HeaderConstants.TOKEN)) == str(
-            EnvStartup.get_instance().get(EnvConstants.HTTP_AUTH_TOKEN)):
+            EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTP_AUTH_TOKEN)):
         if not ("/api/docs" in request_uri or "/swagger/swagger.yml" in request_uri):  # exclude swagger
             headers = {
                 HeaderConstants.X_REQUEST_ID: message_dumper.get_header(HeaderConstants.X_REQUEST_ID)

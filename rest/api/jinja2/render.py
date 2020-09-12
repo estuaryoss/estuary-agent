@@ -10,7 +10,7 @@ import sys
 import jinja2
 import yaml
 
-from rest.environment.environment import Environment
+from rest.environment.environment import EnvironmentSingleton
 
 
 class Render:
@@ -24,7 +24,8 @@ class Render:
         self.template = template
         self.variables = variables
         self.env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(Environment.get_instance().get_env_and_virtual_env().get('TEMPLATES_DIR')),
+            loader=jinja2.FileSystemLoader(
+                EnvironmentSingleton.get_instance().get_env_and_virtual_env().get('TEMPLATES_DIR')),
             extensions=['jinja2.ext.autoescape', 'jinja2.ext.do', 'jinja2.ext.loopcontrols', 'jinja2.ext.with_'],
             autoescape=True,
             trim_blocks=True)
@@ -35,12 +36,12 @@ class Render:
     def env_override(self, value, key):
         return os.getenv(key, value)
 
-    def rend_template(self, vars_dir=Environment.get_instance().get_env_and_virtual_env().get('VARS_DIR')):
+    def rend_template(self, vars_dir=EnvironmentSingleton.get_instance().get_env_and_virtual_env().get('VARS_DIR')):
         with open(vars_dir + "/" + self.variables, closefd=True) as f:
             data = yaml.safe_load(f)
 
         self.env.filters['yaml'] = self.yaml_filter
-        self.env.globals["environ"] = lambda key: Environment.get_instance().get_env_and_virtual_env().get(key)
+        self.env.globals["environ"] = lambda key: EnvironmentSingleton.get_instance().get_env_and_virtual_env().get(key)
         self.env.globals["get_context"] = lambda: data
 
         try:
@@ -56,5 +57,5 @@ class Render:
 
 
 if __name__ == '__main__':
-    render = Render(Environment.get_instance().get_env_and_virtual_env().get('TEMPLATE'),
-                    Environment.get_instance().get_env_and_virtual_env().get('VARIABLES')).rend_template()
+    render = Render(EnvironmentSingleton.get_instance().get_env_and_virtual_env().get('TEMPLATE'),
+                    EnvironmentSingleton.get_instance().get_env_and_virtual_env().get('VARIABLES')).rend_template()
