@@ -155,10 +155,10 @@ curl -X POST -d 'ls -lrt' http://localhost:8080/command
 ```
 
 ## Estuary stack
-[Estuary deployer](https://github.com/dinuta/estuary-deployer)  
-[Estuary agent](https://github.com/dinuta/estuary-agent)  
-[Estuary discovery](https://github.com/dinuta/estuary-discovery)  
-[Estuary viewer](https://github.com/dinuta/estuary-viewer)  
+[Estuary deployer](https://github.com/estuaryoss/estuary-deployer)  
+[Estuary agent](https://github.com/estuaryoss/estuary-agent)  
+[Estuary discovery](https://github.com/estuaryoss/estuary-discovery)  
+[Estuary viewer](https://github.com/estuaryoss/estuary-viewer)  
 
 ## Templating service
 [Jinja2Docker](https://github.com/dinuta/jinja2docker) 
