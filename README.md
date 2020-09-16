@@ -5,9 +5,8 @@ Support project: <a href="https://paypal.me/catalindinuta?locale.x=en_US"><img s
 ## Estuary agent
 Estuary agent is a service that exposes your cli commands/app via REST API.
 
-## Coverage and code quality
-[![Coverage Status](https://coveralls.io/repos/github/estuaryoss/estuary-agent/badge.svg?branch=master)](https://coveralls.io/github/estuaryoss/estuary-agent?branch=master)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8876747a1c044d1cb855e4e652365c99)](https://www.codacy.com/gh/estuaryoss/estuary-agent?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=estuaryoss/estuary-agent&amp;utm_campaign=Badge_Grade)
+## Code quality
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2b4052d9749348c49543fe6b830dc052)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=estuaryoss/estuary-agent&amp;utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/e993e853603af9dd0906/maintainability)](https://codeclimate.com/github/estuaryoss/estuary-agent/maintainability)
 
 ## Linux status
