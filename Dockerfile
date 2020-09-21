@@ -26,6 +26,7 @@ RUN mkdir /data/
 
 ## Expose some volumes
 ENV SCRIPTS_DIR /scripts
+ENV HTTPS_DIR $SCRIPTS_DIR/https
 ENV WORKSPACE $SCRIPTS_DIR/inputs
 
 VOLUME ["$WORKSPACE/templates"]
@@ -38,6 +39,8 @@ ENV PORT 8080
 ENV TZ UTC
 
 COPY ./ $SCRIPTS_DIR/
+COPY https/key.pem $HTTPS_DIR/
+COPY https/cert.pem $HTTPS_DIR/
 COPY inputs/templates/ $TEMPLATES_DIR/
 COPY inputs/variables/ $VARS_DIR/
 

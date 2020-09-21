@@ -46,5 +46,10 @@ if __name__ == "__main__":
     app.logger.debug({"msg": EnvStartupSingleton.get_instance().get_config_env_vars()})
 
     fluentd_utils.emit(tag=fluentd_tag, msg=environ_dump)
-
-    app.run(host=host, port=port)
+    is_https = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_ENABLE)
+    https_cert_path = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT)
+    https_prv_key_path = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_KEY)
+    ssl_context = None
+    if is_https:
+        ssl_context = (https_cert_path, https_prv_key_path)
+    app.run(host=host, port=port, ssl_context=ssl_context)
