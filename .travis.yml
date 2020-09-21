@@ -89,7 +89,7 @@ jobs:
         - cp dist/main_flask main-linux
         - cp dist/start start.py-linux
       script:
-        - docker build -t estuaryoss/agent-centos:latest -f Dockerfiles/Dockerfile_centos .
+        - docker build -t estuaryoss/agent-centos:latest -f Dockerfile_centos .
         - docker run
           -d
           -p 8080:8080
@@ -109,7 +109,9 @@ jobs:
         DOCKER_SCRIPTS_DIR: /scripts
         ISOLATED: true
       before_script:
+        - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
         - docker build -t estuaryoss/agent:latest -f Dockerfile .
+        - docker tag estuaryoss/agent:latest dinutac/estuary-agent:latest # <-- remove this when migrating
       script:
         #run eureka registration tests
         - docker-compose up -d

@@ -13,7 +13,7 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 [![Build Status](https://travis-ci.org/estuaryoss/estuary-agent.svg?branch=master)](https://travis-ci.org/estuaryoss/estuary-agent)
 
 ## Windows status
-[![CircleCI](https://circleci.com/gh/estuaryoss/estuary-agent.svg?style=svg)](https://circleci.com/gh/estuaryoss/estuary-agent)  
+[![CircleCI](https://circleci.com/gh/estuaryoss/estuary-agent.svg?style=svg&circle-token=788cad6fda7d9000039bb294b9380808ab3c1c18)](https://circleci.com/gh/estuaryoss/estuary-agent)  
 
 ## Docker Hub
 [alpine](https://hub.docker.com/r/estuaryoss/agent)  ![](https://img.shields.io/docker/pulls/estuaryoss/agent.svg)  
@@ -102,6 +102,11 @@ Run example:
 Then, access the Http Api. Call example:
   
     curl -i -H 'Token:mysecret' http:localhost:8080/about
+
+### Enable HTTPS
+Set **HTTPS_ENABLE** env var option to *true* or *false*.    
+Set the certificate and the private key path with **HTTPS_CERT** and **HTTPS_KEY** env variables. 
+If you do not set cert and private key file env vars, it defaults to a folder in the same path called *https*, and the default files *https/cert.pem* and *https/key.pem*. 
 
 ## Environment variables injection
 User defined environment variables will be stored in a 'virtual' environment. The extra env vars will be used by the process that executes system commands.  
