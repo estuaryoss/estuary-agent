@@ -7,10 +7,10 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 
 ## Code quality
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2b4052d9749348c49543fe6b830dc052)](https://www.codacy.com?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=estuaryoss/estuary-agent&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/e993e853603af9dd0906/maintainability)](https://codeclimate.com/github/estuaryoss/estuary-agent/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/e86a41110965208ed6ee/maintainability)](https://codeclimate.com/repos/5f6783bd918852017800167e/maintainability)
 
 ## Linux status
-[![Build Status](https://travis-ci.org/estuaryoss/estuary-agent.svg?branch=master)](https://travis-ci.org/estuaryoss/estuary-agent)
+[![Build Status](https://travis-ci.com/estuaryoss/estuary-agent.svg?token=UC9Z5nQSPmb5vK5QLpJh&branch=master)](https://travis-ci.com/estuaryoss/estuary-agent)
 
 ## Windows status
 [![CircleCI](https://circleci.com/gh/estuaryoss/estuary-agent.svg?style=svg&circle-token=788cad6fda7d9000039bb294b9380808ab3c1c18)](https://circleci.com/gh/estuaryoss/estuary-agent)  
