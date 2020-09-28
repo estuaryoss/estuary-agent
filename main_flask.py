@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import multiprocessing
 import os
+import sys
 from pathlib import Path
 
 from rest.api.constants.env_constants import EnvConstants
@@ -16,6 +17,9 @@ from rest.utils.io_utils import IOUtils
 if __name__ == "__main__":
     # fix for pyinstaller
     multiprocessing.freeze_support()
+
+    cli = sys.modules['flask.cli']
+    cli.show_server_banner = lambda *x: None
 
     message_dumper = MessageDumper()
     io_utils = IOUtils()
