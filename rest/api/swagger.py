@@ -3,7 +3,7 @@ swagger_file_content = '''
 info:
   description: |
     Estuary agent which will run your shell commands via REST API
-  version: "4.0.9"
+  version: "4.1.0"
   title: estuary-agent
   termsOfService: http://swagger.io/terms/
   contact:

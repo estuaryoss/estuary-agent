@@ -1,0 +1,11 @@
+env:
+  TEMPLATES_DIR: inputs/templates
+  VARS_DIR: inputs/variables
+  SCRIPTS_DIR: tests
+  ISOLATED: true
+before_script:
+  - echo before_script
+script:
+  - echo script
+after_script:
+  - echo after_script

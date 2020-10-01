@@ -18,7 +18,7 @@ from tests.rest_win.error_codes import ErrorCodes
 class FlaskServerTestCase(unittest.TestCase):
     server = "http://127.0.0.1:8080"
 
-    expected_version = "4.0.9"
+    expected_version = "4.1.0"
 
     def setUp(self):
         requests.delete(self.server + "/commanddetached")
@@ -178,7 +178,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + "/render/" + template + "/" + variables)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn(expected, body.get("description"))
 
     @parameterized.expand([
@@ -191,7 +191,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + "/render/" + template + "/" + variables)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn(expected, body.get("description"))
 
     @parameterized.expand([
@@ -230,7 +230,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + f"/file", headers=headers)
         body = response.json()
         headers = response.headers
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_FILE_FAILURE))
         self.assertEqual(body.get('version'), self.expected_version)
@@ -247,7 +247,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -284,7 +284,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -303,7 +303,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get('message'),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
         self.assertIn("Exception", body.get("description"))
@@ -322,7 +322,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -363,7 +363,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=payload, headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('description'),
@@ -513,7 +513,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=payload, headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % mandatory_header_key)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -535,7 +535,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=payload, headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('version'), self.expected_version)
@@ -842,7 +842,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
         response = requests.post(self.server + f"/env", data=payload, headers=headers)
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_JSON_PAYLOAD) % payload)
@@ -857,7 +857,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
         response = requests.post(self.server + f"/env", data=payload, headers=headers)
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SET_ENV_VAR_FAILURE) % payload)
