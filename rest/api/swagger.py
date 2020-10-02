@@ -61,7 +61,7 @@ paths:
           description: Set environment variables response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Set environment variables failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -150,7 +150,7 @@ paths:
           description: jinja2 templating response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: jinja2 templating failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -190,7 +190,7 @@ paths:
           description: jinja2 templating response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: jinja2 templating failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -224,7 +224,7 @@ paths:
           description: commands start response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -245,7 +245,7 @@ paths:
           description: Get command detached info response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Get command detached info failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -265,7 +265,7 @@ paths:
           description: command detached stop success
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: command detached stop failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -299,7 +299,7 @@ paths:
           description: The content of the file was uploaded successfully
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Failure, the file content could not be uploaded
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -327,7 +327,7 @@ paths:
           description: The content of the file in plain text, response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Failure, the file content could not be read
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -356,7 +356,7 @@ paths:
           description: The content of the folder as zip archive
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: The content of the folder could not be obtained
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -385,7 +385,7 @@ paths:
           description: commands start response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -414,7 +414,7 @@ paths:
           description: commands start response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"  
