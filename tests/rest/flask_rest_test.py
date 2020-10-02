@@ -16,6 +16,8 @@ from tests.rest.utils import Utils
 
 
 class FlaskServerTestCase(unittest.TestCase):
+    script_path = "tests/rest_win/input"
+    # script_path = "input"
     server = "http://127.0.0.1:8080"
 
     expected_version = "4.1.0"
@@ -621,6 +623,25 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    def test_executecommand_yaml_p(self):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            payload = f.read()
+
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=payload)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
+        self.assertEqual(len(body.get('description').get('description').get('commands')), 3)
+        self.assertEqual(body.get('description').get('config'), yaml.safe_load(payload))
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 

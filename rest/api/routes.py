@@ -282,9 +282,18 @@ def command_detached_start_yaml(command_id):
     self_ip = "127.0.0.1"
     protocol = "https" if EnvStartupSingleton.get_instance().get_config_env_vars().get(
         EnvConstants.HTTPS_ENABLE) else "http"
+    input_data = request.data.decode("UTF-8", "replace").strip()
+
+    if not input_data:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 )), 500, mimetype="application/json")
 
     try:
-        config_loader = ConfigLoader.load(request.data.decode("UTF-8", "replace").strip())
+        config_loader = ConfigLoader.load(input_data)
         yaml_cmds_splitter = YamlCommandsSplitter(config_loader.get_config())
         cmds_list_as_string = "\n".join(yaml_cmds_splitter.get_cmds_in_order())
     except Exception as e:
@@ -319,8 +328,7 @@ def command_detached_start_yaml(command_id):
             "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
             "ip": self_ip,
             "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
-            "endpoint": f"/commanddetached/{command_id}",
-            "timeout": 5
+            "endpoint": f"/commanddetached/{command_id}"
         }
         rest_service = RestApi(conn)
         response = rest_service.post(data=cmds_list_as_string, headers=request.headers)
