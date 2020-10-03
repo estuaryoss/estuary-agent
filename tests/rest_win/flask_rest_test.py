@@ -754,7 +754,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('code'), 0)
-        self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "1 \r\n2")
+        self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "1 \r\n2\r\n")
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
         self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
