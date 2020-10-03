@@ -16,8 +16,8 @@ from tests.rest.utils import Utils
 
 
 class FlaskServerTestCase(unittest.TestCase):
-    # script_path = "tests/rest_win/input"
-    script_path = "input"
+    script_path = "tests/rest_win/input"
+    # script_path = "input"
     server = "http://127.0.0.1:8080"
 
     expected_version = "4.1.0"
