@@ -46,7 +46,7 @@ jobs:
         - docker exec estuary-agent python3 -m unittest discover /scripts/tests/rest *_test.py
         - docker exec estuary-agent python3 -m unittest discover /scripts/ "render_test.py"
 
-      #run executable tests. exec with pyinstaller
+      #run integration and unit tests on binary. exec with pyinstaller
     - language: python
       services: docker
       env:
@@ -70,6 +70,7 @@ jobs:
         #  - ./ngrok.sh
         #  - sleep 3600
         - python3 -m unittest discover tests/rest "*_test.py"
+        - python3 -m unittest discover tests/unit "*_test.py"
         - ls -lrt /tmp
         - ps -ef
 
