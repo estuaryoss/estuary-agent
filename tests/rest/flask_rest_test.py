@@ -10,8 +10,8 @@ from flask import json
 from parameterized import parameterized
 from requests_toolbelt.utils import dump
 
-from tests.rest.api_code_constants import ApiCodeConstants
-from tests.rest.error_codes import ErrorCodes
+from rest.api.constants.api_code_constants import ApiCodeConstants
+from rest.api.responsehelpers.error_codes import ErrorCodes
 from tests.rest.utils import Utils
 
 
@@ -642,6 +642,52 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(len(body.get('description').get('description').get('commands')), 3)
         self.assertEqual(body.get('description').get('config'), yaml.safe_load(payload))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    @parameterized.expand([
+        "env", "before_script", "after_script"
+    ])
+    def test_executecommandyaml_fields_permitted_to_miss(self, sub_config):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        payload.pop(sub_config, None)
+
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=yaml.dump(payload, Dumper=yaml.Dumper, indent=4))
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
+        self.assertGreaterEqual(len(body.get('description').get('description').get('commands')), 2)
+        self.assertDictContainsSubset(payload, body.get('description').get('config'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    @parameterized.expand([
+        "script"
+    ])
+    def test_executecommandyaml_fields_not_permitted_to_miss(self, sub_config):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        payload.pop(sub_config, None)
+
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=yaml.dump(payload, Dumper=yaml.Dumper, indent=4))
+
+        body = response.json()
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_YAML_CONFIG))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_YAML_CONFIG)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 

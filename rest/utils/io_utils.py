@@ -43,7 +43,7 @@ class IOUtils:
     @staticmethod
     def write_to_file_dict(file, content):
         with open(file, 'w') as f:
-            json.dump(content, f)
+            f.write(json.dumps(content, indent=4))
 
     @staticmethod
     def read_dict_from_file(file):

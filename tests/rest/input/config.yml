@@ -1,5 +1,4 @@
 env:
-  ISOLATED: "true"
   MINE: "YOURS"
 before_script:
   - echo before_script
