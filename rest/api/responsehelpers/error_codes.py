@@ -21,4 +21,5 @@ class ErrorCodes:
         ApiCodeConstants.UNAUTHORIZED: "Unauthorized",
         ApiCodeConstants.SET_ENV_VAR_FAILURE: "Failed to set env vars \"%s\"",
         ApiCodeConstants.INVALID_JSON_PAYLOAD: "Invalid json body \"%s\"",
+        ApiCodeConstants.INVALID_YAML_CONFIG: "Invalid yaml config",
     }

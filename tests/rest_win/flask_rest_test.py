@@ -10,15 +10,17 @@ import yaml
 from flask import json
 from parameterized import parameterized
 
+from rest.api.constants.api_code_constants import ApiCodeConstants
+from rest.api.responsehelpers.error_codes import ErrorCodes
 from tests.rest.utils import Utils
-from tests.rest_win.api_code_constants import ApiCodeConstants
-from tests.rest_win.error_codes import ErrorCodes
 
 
 class FlaskServerTestCase(unittest.TestCase):
+    script_path = "tests/rest_win/input"
+    # script_path = "input"
     server = "http://127.0.0.1:8080"
 
-    expected_version = "4.0.9"
+    expected_version = "4.1.0"
 
     def setUp(self):
         requests.delete(self.server + "/commanddetached")
@@ -178,7 +180,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + "/render/" + template + "/" + variables)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn(expected, body.get("description"))
 
     @parameterized.expand([
@@ -191,7 +193,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + "/render/" + template + "/" + variables)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn(expected, body.get("description"))
 
     @parameterized.expand([
@@ -230,7 +232,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.get(self.server + f"/file", headers=headers)
         body = response.json()
         headers = response.headers
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_FILE_FAILURE))
         self.assertEqual(body.get('version'), self.expected_version)
@@ -247,7 +249,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -284,7 +286,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -303,7 +305,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get('message'),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
         self.assertIn("Exception", body.get("description"))
@@ -322,7 +324,7 @@ class FlaskServerTestCase(unittest.TestCase):
             self.server + f"/folder", headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -363,7 +365,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=payload, headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('description'),
@@ -440,6 +442,35 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), list)
 
+    def test_get_commandyaml_info(self):
+        test_id = "yaml"
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        headers = {'Content-type': 'text/plain'}
+
+        response = requests.post(
+            self.server + f"/commanddetachedyaml/{test_id}",
+            data=string_payload, headers=headers)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description').get('description'), test_id)
+        self.assertEqual(body.get('description').get('config'), payload)
+
+        time.sleep(1)
+        response = requests.get(self.server + "/commanddetached")
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description').get('id'), test_id)
+        self.assertEqual(body.get('description').get('started'), False)
+        self.assertEqual(body.get('description').get('finished'), True)
+        self.assertNotEqual(body.get('description').get('startedat'), "none")
+        self.assertNotEqual(body.get('description').get('finishedat'), "none")
+        self.assertEqual(round(int(body.get('description').get('duration'))), 0)
+        self.assertIsInstance(body.get('description').get('duration'), float)
+        self.assertEqual(len(body.get('description').get("commands")), 3)
+
     @parameterized.expand([
         "3"
     ])
@@ -513,7 +544,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=payload, headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % mandatory_header_key)
         self.assertEqual(body.get('version'), self.expected_version)
@@ -535,7 +566,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=payload, headers=headers)
 
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('version'), self.expected_version)
@@ -584,12 +615,13 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
-    def test_executecommand_p(self):
-        command = "type requirements.txt"
+    def test_executecommand_yaml_p(self):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            payload = f.read()
 
         response = requests.post(
-            self.server + f"/command",
-            data=command)
+            self.server + f"/commandyaml",
+            data=payload)
 
         body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -597,11 +629,54 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), self.expected_version)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
-        self.assertEqual(body.get('description').get('commands').get(command).get('details').get('code'), 0)
-        self.assertNotEqual(body.get('description').get('commands').get(command).get('details').get('out'), "")
-        self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
-        self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertEqual(len(body.get('description').get('description').get('commands')), 3)
+        self.assertEqual(body.get('description').get('config'), yaml.safe_load(payload))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    @parameterized.expand([
+        "env", "before_script", "after_script"
+    ])
+    def test_executecommandyaml_fields_permitted_to_miss(self, sub_config):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        payload.pop(sub_config, None)
+
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=yaml.dump(payload, Dumper=yaml.Dumper, indent=4))
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
+        self.assertGreaterEqual(len(body.get('description').get('description').get('commands')), 2)
+        self.assertDictContainsSubset(payload, body.get('description').get('config'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    @parameterized.expand([
+        "script"
+    ])
+    def test_executecommandyaml_fields_not_permitted_to_miss(self, sub_config):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        payload.pop(sub_config, None)
+
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=yaml.dump(payload, Dumper=yaml.Dumper, indent=4))
+
+        body = response.json()
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_YAML_CONFIG))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_YAML_CONFIG)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -842,7 +917,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
         response = requests.post(self.server + f"/env", data=payload, headers=headers)
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_JSON_PAYLOAD) % payload)
@@ -857,7 +932,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
         response = requests.post(self.server + f"/env", data=payload, headers=headers)
         body = response.json()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SET_ENV_VAR_FAILURE) % payload)

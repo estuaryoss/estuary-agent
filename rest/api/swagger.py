@@ -3,7 +3,7 @@ swagger_file_content = '''
 info:
   description: |
     Estuary agent which will run your shell commands via REST API
-  version: "4.0.9"
+  version: "4.1.0"
   title: estuary-agent
   termsOfService: http://swagger.io/terms/
   contact:
@@ -55,13 +55,13 @@ paths:
         description: List of env vars by key-value pair
         required: true
         schema:
-          $ref: '#/definitions/envvar'
+          $ref: '#/definitions/EnvVar'
       responses:
         200:
           description: Set environment variables response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Set environment variables failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -150,7 +150,7 @@ paths:
           description: jinja2 templating response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: jinja2 templating failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -184,14 +184,48 @@ paths:
         description: List of env vars by key-value pair
         required: false
         schema:
-          $ref: '#/definitions/envvar'
+          $ref: '#/definitions/EnvVar'
       responses:
         200:
           description: jinja2 templating response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: jinja2 templating failure
+          schema:
+            $ref: "#/definitions/ApiResponse"
+  /commanddetachedyaml/{id}:
+    post:
+      tags:
+        - estuary-agent
+      summary: Runs commands in detached mode. Commands are described in an yaml file. Also applies environment vars.
+      consumes:
+        - text/plain
+      produces:
+        - application/json
+      parameters:
+      - in: header
+        name: Token
+        type: string
+        required: false
+      - name: id
+        in: path
+        description: Id set by the user
+        required: true
+        type: string
+      - name: yaml_content
+        in: body
+        description: List of commands and environment to run.
+        required: true
+        schema:
+          $ref: '#/definitions/CommandsContentYaml'
+      responses:
+        200:
+          description: Commands start response
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: Commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
   /commanddetached/{id}:
@@ -218,13 +252,13 @@ paths:
         description: List of commands to run one after the other. E.g. make/mvn/sh/npm
         required: true
         schema:
-          $ref: '#/definitions/test_file_content'
+          $ref: '#/definitions/TestFileContent'
       responses:
         200:
           description: commands start response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -245,7 +279,7 @@ paths:
           description: Get command detached info response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Get command detached info failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -265,7 +299,7 @@ paths:
           description: command detached stop success
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: command detached stop failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -289,7 +323,7 @@ paths:
         description: The content of the file
         required: true
         schema:
-          $ref: '#/definitions/filecontent'
+          $ref: '#/definitions/FileContent'
       - in: header
         name: File-Path
         type: string
@@ -299,7 +333,7 @@ paths:
           description: The content of the file was uploaded successfully
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Failure, the file content could not be uploaded
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -327,7 +361,7 @@ paths:
           description: The content of the file in plain text, response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: Failure, the file content could not be read
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -356,7 +390,7 @@ paths:
           description: The content of the folder as zip archive
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
           description: The content of the folder could not be obtained
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -379,13 +413,42 @@ paths:
         description: Commands to run. E.g. ls -lrt
         required: true
         schema:
-          $ref: '#/definitions/commands_content'
+          $ref: '#/definitions/CommandsContent'
       responses:
         200:
           description: commands start response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
+        500:
+          description: commands start failure
+          schema:
+            $ref: "#/definitions/ApiResponse"
+  /commandyaml:
+    post:
+      tags:
+        - estuary-agent
+      summary: Starts multiple commands in blocking mode, described through yaml file. Set the client timeout at needed value.
+      consumes:
+        - text/plain
+      produces:
+        - application/json
+      parameters:
+      - in: header
+        name: Token
+        type: string
+        required: false
+      - name: yaml_content
+        in: body
+        description: Commands to run as yaml content
+        required: true
+        schema:
+          $ref: '#/definitions/CommandsContentYaml'
+      responses:
+        200:
+          description: commands start response
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        500:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
@@ -408,14 +471,14 @@ paths:
         description: Commands to run. E.g. ls -lrt
         required: true
         schema:
-          $ref: '#/definitions/commands_content'
+          $ref: '#/definitions/CommandsContent'
       responses:
         200:
-          description: commands start response
+          description: Commands start response
           schema:
             $ref: "#/definitions/ApiResponse"
-        404:
-          description: commands start failure
+        500:
+          description: Commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"  
 definitions:
@@ -423,37 +486,51 @@ definitions:
       type: object
       properties:
         message:
-          type: object
+          type: string
         description:
-          type: "string"
+          type: object
         code:
           type: "string"
-        time:
+        timestamp:
           type: "string"
           format: "date-time"
+        path:
+          type: "string"
         name:
           type: "string"
         version:
           type: "string"
-    envvar:
+    EnvVar:
       type: object
       example: |
           {"DATABASE" : "mysql56", "IMAGE":"latest"}
-    filecontent:
+    FileContent:
       type: object
       example: {"file" : "/home/automation/config.properties", "content" : "ip=10.0.0.1\nrequest_sec=100\nthreads=10\ntype=dual"}
-    test_file_content:
+    TestFileContent:
       type: string
       minLength: 3
       example: |
         mvn test -Dtype=Prepare
         mvn test -Dtype=ExecuteTests
-    commands_content:
+    CommandsContent:
       type: string
       minLength: 3
       example: |
         ls -lrt
         cat config.json
+    CommandsContentYaml:
+      type: string
+      minLength: 3
+      example: |
+        env:
+          MY_ENV_VAR: "MY_VALUE"
+        before_script:
+          - echo before_script
+        script:
+          - echo script
+        after_script:
+          - echo after_script
 externalDocs:
   description: Find out more on github
   url: https://github.com/dinuta/estuary-agent

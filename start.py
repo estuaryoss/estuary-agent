@@ -8,7 +8,7 @@ from rest.utils.io_utils import IOUtils
 
 if __name__ == '__main__':
     io_utils = IOUtils()
-    command_logger_path = "commandinfologger.txt"
+    command_logger_path = "command_info_logger.txt"
     file_path = EnvInit.COMMAND_DETACHED_FILENAME
 
     io_utils.append_to_file(command_logger_path, " ".join(sys.argv[:-1]) + f" \"{sys.argv[-1]}\"")

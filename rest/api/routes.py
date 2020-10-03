@@ -24,12 +24,17 @@ from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.responsehelpers.error_codes import ErrorCodes
 from rest.api.responsehelpers.http_response import HttpResponse
 from rest.api.swagger import swagger_file_content
+from rest.environment.env_vars_setter import EnvVarsSetter
 from rest.environment.environment import EnvironmentSingleton
+from rest.model.config_descriptor import ConfigDescriptor
+from rest.model.config_loader import ConfigLoader
 from rest.service.fluentd import Fluentd
+from rest.service.restapi import RestApi
 from rest.utils.cmd_utils import CmdUtils
 from rest.utils.env_startup import EnvStartupSingleton
 from rest.utils.io_utils import IOUtils
 from rest.utils.process_utils import ProcessUtils
+from rest.utils.yaml_cmds_splitter import YamlCommandsSplitter
 
 app = AppCreatorSingleton.get_instance().get_app()
 logger = \
@@ -147,7 +152,7 @@ def get_content_with_env(template, variables):
         response = Response(json.dumps(http.response(code=ApiCodeConstants.JINJA2_RENDER_FAILURE,
                                                      message=ErrorCodes.HTTP_CODE.get(
                                                          ApiCodeConstants.JINJA2_RENDER_FAILURE),
-                                                     description="Exception({})".format(e.__str__()))), 404,
+                                                     description="Exception({})".format(e.__str__()))), 500,
                             mimetype="application/json")
 
     return response
@@ -171,7 +176,7 @@ def get_command_detached_info():
         return Response(json.dumps(http.response(code=ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE),
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
     return Response(
         json.dumps(
@@ -194,7 +199,7 @@ def set_env():
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.INVALID_JSON_PAYLOAD) % str(
                                                      input_data),
-                                                 description="Exception({0})".format(e.__str__()))), 404,
+                                                 description="Exception({0})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     try:
@@ -207,7 +212,7 @@ def set_env():
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.SET_ENV_VAR_FAILURE) % str(
                                                      input_data),
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
     return Response(
         json.dumps(
@@ -245,7 +250,7 @@ def command_detached_start(command_id):
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                  description=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
-                                                 )), 404, mimetype="application/json")
+                                                 )), 500, mimetype="application/json")
     try:
         input_data_list = input_data.split("\n")
         command_detached_init["id"] = command_id
@@ -260,13 +265,88 @@ def command_detached_start(command_id):
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.COMMAND_DETACHED_START_FAILURE) % command_id,
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
         json.dumps(
             http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS), command_id)),
         200,
+        mimetype="application/json")
+
+
+@app.route('/commanddetachedyaml/<command_id>', methods=['POST', 'PUT'])
+def command_detached_start_yaml(command_id):
+    command_id = command_id.strip()
+    http = HttpResponse()
+    self_ip = "127.0.0.1"
+    protocol = "https" if EnvStartupSingleton.get_instance().get_config_env_vars().get(
+        EnvConstants.HTTPS_ENABLE) else "http"
+    input_data = request.data.decode("UTF-8", "replace").strip()
+
+    if not input_data:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 )), 500, mimetype="application/json")
+
+    try:
+        config_loader = ConfigLoader.load(input_data)
+        yaml_cmds_splitter = YamlCommandsSplitter(config_loader.get_config())
+        cmds_list_as_string = "\n".join(yaml_cmds_splitter.get_cmds_in_order())
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.INVALID_YAML_CONFIG,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.INVALID_YAML_CONFIG),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+    try:
+        conn = {
+            "protocol": protocol,
+            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
+            "ip": self_ip,
+            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
+            "endpoint": f"/env"
+        }
+        evs = EnvVarsSetter(conn=conn, config=config_loader.get_config())
+        response = evs.set_env_vars(headers=request.headers)
+        env_vars_set = response.json().get("description")
+        if response.status_code != 200:
+            raise Exception(response.json().get("description"))
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.SET_ENV_VAR_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.SET_ENV_VAR_FAILURE) % evs.get_env_vars(),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+
+    try:
+        conn = {
+            "protocol": protocol,
+            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
+            "ip": self_ip,
+            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
+            "endpoint": f"/commanddetached/{command_id}"
+        }
+        rest_service = RestApi(conn)
+        response = rest_service.post(data=cmds_list_as_string, headers=request.headers)
+        if response.status_code != 200:
+            raise Exception(response.json().get("description"))
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.COMMAND_DETACHED_START_FAILURE) % command_id,
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+
+    # only env vars that were set
+    config_loader.get_config()[evs.get_env_key()] = env_vars_set
+    return Response(
+        json.dumps(
+            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          ConfigDescriptor.description(command_id, config_loader.get_config()))), 200,
         mimetype="application/json")
 
 
@@ -283,21 +363,21 @@ def upload_file():
                                                      message=ErrorCodes.HTTP_CODE.get(
                                                          ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
                                                      description=ErrorCodes.HTTP_CODE.get(
-                                                         ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 404,
+                                                         ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 500,
                             mimetype="application/json")
         if not file_content:
             return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
                                                      message=ErrorCodes.HTTP_CODE.get(
                                                          ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                      description=ErrorCodes.HTTP_CODE.get(
-                                                         ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
+                                                         ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 500,
                             mimetype="application/json")
         io_utils.write_to_file_binary(file_path, file_content)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.UPLOAD_FILE_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.UPLOAD_FILE_FAILURE),
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
@@ -318,7 +398,7 @@ def get_file():
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
                                                  description=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 404,
+                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 500,
                         mimetype="application/json")
 
     try:
@@ -327,7 +407,7 @@ def get_file():
         response = Response(json.dumps(http.response(code=ApiCodeConstants.GET_FILE_FAILURE,
                                                      message=ErrorCodes.HTTP_CODE.get(
                                                          ApiCodeConstants.GET_FILE_FAILURE),
-                                                     description="Exception({})".format(e.__str__()))), 404,
+                                                     description="Exception({})".format(e.__str__()))), 500,
                             mimetype="application/json")
     return response
 
@@ -345,7 +425,7 @@ def get_results_folder():
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key,
                                                  description=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 404,
+                                                     ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)), 500,
                         mimetype="application/json")
 
     try:
@@ -354,7 +434,7 @@ def get_results_folder():
         return Response(json.dumps(http.response(code=ApiCodeConstants.FOLDER_ZIP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.FOLDER_ZIP_FAILURE) % folder_path,
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
     return flask.send_file(
         f"/tmp/{archive_name}.zip",
@@ -386,7 +466,7 @@ def command_detached_stop():
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE) % command_id,
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
@@ -409,7 +489,7 @@ def execute_command():
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                  description=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 500,
                         mimetype="application/json")
     try:
         input_data_list = input_data.split("\n")
@@ -420,7 +500,7 @@ def execute_command():
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_EXEC_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.COMMAND_EXEC_FAILURE),
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
@@ -428,6 +508,84 @@ def execute_command():
             http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
                           description=response)),
         200,
+        mimetype="application/json")
+
+
+@app.route('/commandyaml', methods=['POST', 'PUT'])
+def execute_command_yaml():
+    env.set_env_var(EnvConstants.TEMPLATE, "start.py")
+    env.set_env_var(EnvConstants.VARIABLES, "commandinfo.json")
+    http = HttpResponse()
+    self_ip = "127.0.0.1"
+    protocol = "https" if EnvStartupSingleton.get_instance().get_config_env_vars().get(
+        EnvConstants.HTTPS_ENABLE) else "http"
+    input_data = request.data.decode("UTF-8", "replace").strip()
+
+    if not input_data:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
+                                                 description=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 500,
+                        mimetype="application/json")
+
+    try:
+        config_loader = ConfigLoader.load(input_data)
+        yaml_cmds_splitter = YamlCommandsSplitter(config_loader.get_config())
+        cmds_list_as_string = "\n".join(yaml_cmds_splitter.get_cmds_in_order())
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.INVALID_YAML_CONFIG,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.INVALID_YAML_CONFIG),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+    try:
+        conn = {
+            "protocol": protocol,
+            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
+            "ip": self_ip,
+            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
+            "endpoint": f"/env"
+        }
+        evs = EnvVarsSetter(conn=conn, config=config_loader.get_config())
+        response = evs.set_env_vars(headers=request.headers)
+        env_vars_set = response.json().get("description")
+        if response.status_code != 200:
+            raise Exception(response.json().get("description"))
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.SET_ENV_VAR_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.SET_ENV_VAR_FAILURE) % evs.get_env_vars(),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+
+    try:
+        conn = {
+            "protocol": protocol,
+            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
+            "ip": self_ip,
+            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
+            "endpoint": f"/command",
+            "timeout": 3600
+        }
+        rest_service = RestApi(conn)
+        response = rest_service.post(data=cmds_list_as_string, headers=request.headers)
+        if response.status_code != 200:
+            raise Exception(response.json().get("description"))
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_EXEC_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.COMMAND_EXEC_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+
+    # only env vars that were set
+    config_loader.get_config()[evs.get_env_key()] = env_vars_set
+    return Response(
+        json.dumps(
+            http.response(ApiCodeConstants.SUCCESS, ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          ConfigDescriptor.description(response.json().get("description"),
+                                                       config_loader.get_config()))), 200,
         mimetype="application/json")
 
 
@@ -443,7 +601,7 @@ def execute_command_parallel():
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED),
                                                  description=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 404,
+                                                     ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 500,
                         mimetype="application/json")
     try:
         input_data_list = input_data.split("\n")
@@ -454,7 +612,7 @@ def execute_command_parallel():
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_EXEC_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
                                                      ApiCodeConstants.COMMAND_EXEC_FAILURE),
-                                                 description="Exception({})".format(e.__str__()))), 404,
+                                                 description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
