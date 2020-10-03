@@ -442,6 +442,35 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), list)
 
+    def test_get_commandyaml_info(self):
+        test_id = "yaml"
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        headers = {'Content-type': 'text/plain'}
+
+        response = requests.post(
+            self.server + f"/commanddetachedyaml/{test_id}",
+            data=string_payload, headers=headers)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description').get('description'), test_id)
+        self.assertEqual(body.get('description').get('config'), payload)
+
+        time.sleep(1)
+        response = requests.get(self.server + "/commanddetached")
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description').get('id'), test_id)
+        self.assertEqual(body.get('description').get('started'), False)
+        self.assertEqual(body.get('description').get('finished'), True)
+        self.assertNotEqual(body.get('description').get('startedat'), "none")
+        self.assertNotEqual(body.get('description').get('finishedat'), "none")
+        self.assertEqual(round(int(body.get('description').get('duration'))), 0)
+        self.assertIsInstance(body.get('description').get('duration'), float)
+        self.assertEqual(len(body.get('description').get("commands")), 3)
+
     @parameterized.expand([
         "3"
     ])
