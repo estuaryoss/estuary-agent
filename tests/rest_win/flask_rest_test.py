@@ -634,6 +634,22 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
+    def test_executecommand_invalid_yaml(self):
+        payload = "awhatever"
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=payload)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(body.get("message"),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_YAML_CONFIG))
+        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_YAML_CONFIG)
+        self.assertIn("Exception", body.get('description'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
     @parameterized.expand([
         "env", "before_script", "after_script"
     ])
