@@ -6,7 +6,7 @@ python-coveralls
 pytest-cov
 flask_swagger_ui
 requests_toolbelt
-py_eureka_client
+py_eureka_client==0.7.4
 flask_cors
 fluent-logger
 Jinja2
