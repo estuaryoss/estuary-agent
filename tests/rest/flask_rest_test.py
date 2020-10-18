@@ -10,6 +10,7 @@ from flask import json
 from parameterized import parameterized
 from requests_toolbelt.utils import dump
 
+from about import properties
 from rest.api.constants.api_code_constants import ApiCodeConstants
 from rest.api.responsehelpers.error_codes import ErrorCodes
 from tests.rest.utils import Utils
@@ -19,8 +20,6 @@ class FlaskServerTestCase(unittest.TestCase):
     script_path = "tests/rest/input"
     # script_path = "input"
     server = "http://127.0.0.1:8080"
-
-    expected_version = "4.1.0"
 
     def setUp(self):
         requests.delete(self.server + "/commanddetached")
@@ -35,7 +34,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertGreaterEqual(len(body.get('description')), 7)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -48,7 +47,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), "pong")
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -62,7 +61,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertIsNotNone(body.get('description'))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -79,7 +78,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('description'), expected_value)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -93,7 +92,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get("description"), None)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -109,7 +108,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description'), service_name)
         self.assertEqual(body.get('name'), service_name)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -125,7 +124,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description'), "Invalid Token")
         self.assertEqual(body.get('name'), service_name)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.UNAUTHORIZED))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.UNAUTHORIZED)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -236,7 +235,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_FILE_FAILURE))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.GET_FILE_FAILURE)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -253,7 +252,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -290,7 +289,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.FOLDER_ZIP_FAILURE)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -309,7 +308,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.FOLDER_ZIP_FAILURE) % container_folder)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.FOLDER_ZIP_FAILURE)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -327,7 +326,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % header_key)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -347,7 +346,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('description'), test_id)
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
@@ -370,7 +369,7 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
         self.assertEqual(body.get('description'),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -566,7 +565,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED) % mandatory_header_key)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.HTTP_HEADER_NOT_PROVIDED)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -588,7 +587,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -610,7 +609,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -626,7 +625,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIn("not found",
                       body.get('description').get('commands').get(command).get('details').get('err'))
@@ -645,7 +644,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('code'), 0)
         self.assertNotEqual(body.get('description').get('commands').get(command).get('details').get('out'), "")
@@ -667,7 +666,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(len(body.get('description').get('description').get('commands')), 3)
         self.assertEqual(body.get('description').get('config'), yaml.safe_load(payload))
@@ -684,7 +683,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_YAML_CONFIG))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_YAML_CONFIG)
         self.assertIn("Exception", body.get('description'))
         self.assertIsNotNone(body.get('timestamp'))
@@ -707,7 +706,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertGreaterEqual(len(body.get('description').get('description').get('commands')), 2)
         self.assertDictContainsSubset(payload, body.get('description').get('config'))
@@ -731,7 +730,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_YAML_CONFIG))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_YAML_CONFIG)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -747,7 +746,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(round(int(body.get('description').get('duration'))), a + b)
         self.assertIsInstance(body.get('description').get('duration'), float)
@@ -769,7 +768,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(round(int(body.get('description').get('duration'))), b)
         self.assertIsInstance(body.get('description').get('duration'), float)
@@ -796,7 +795,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a)
         self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('duration'), float)
@@ -818,7 +817,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('code'), 0)
         self.assertIn("main", body.get('description').get('commands').get(command).get('details').get('out'))
@@ -839,7 +838,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('code'), 0)
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "1\n2\n")
@@ -861,7 +860,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(body.get('description').get('commands').get(commands[0]).get('details').get('code'), 0)
         self.assertEqual(body.get('description').get('commands').get(commands[0]).get('details').get('out'), "")
@@ -896,7 +895,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), payload)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -911,7 +910,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), payload)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -926,7 +925,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), {})
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -940,7 +939,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.INVALID_JSON_PAYLOAD) % payload)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.INVALID_JSON_PAYLOAD)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -954,7 +953,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SET_ENV_VAR_FAILURE) % payload)
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SET_ENV_VAR_FAILURE)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -968,7 +967,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get("message"),
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
-        self.assertEqual(body.get('version'), self.expected_version)
+        self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCodeConstants.SUCCESS)
         self.assertEqual(len(body.get('description').get('commands').get(raw_cmd).get('details').get('args')), 1)
         self.assertEqual(body.get('description').get('commands').get(raw_cmd).get('details').get('args')[0], raw_cmd)

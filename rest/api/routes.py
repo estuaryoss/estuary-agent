@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 import stat
@@ -159,10 +160,39 @@ def get_content_with_env(template, variables):
 
 
 @app.route('/commanddetached', methods=['GET'])
-def get_command_detached_info():
+def get_cmd_detached_info():
     http = HttpResponse()
     io_utils = IOUtils()
-    file = EnvInit.COMMAND_DETACHED_FILENAME
+
+    try:
+        list_of_files = glob.glob(EnvInit.CMD_DETACHED_DIR)
+        file = max(list_of_files, key=os.path.getctime)
+        if not Path(file).is_file():
+            io_utils.write_to_file_dict(file, command_detached_init)
+        command_detached_vars = json.loads(io_utils.read_file(file))
+        command_detached_vars["processes"] = [p.info for p in
+                                              psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
+
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+    return Response(
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=command_detached_vars)),
+        200,
+        mimetype="application/json")
+
+
+@app.route('/commanddetached/<command_id>', methods=['GET'])
+def get_cmd_detached_info_id(command_id):
+    command_id = command_id.strip()
+    http = HttpResponse()
+    io_utils = IOUtils()
+    file = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
 
     try:
         file_path = Path(file)
@@ -232,7 +262,7 @@ def get_env(name):
 
 
 @app.route('/commanddetached/<command_id>', methods=['POST', 'PUT'])
-def command_detached_start(command_id):
+def cmd_detached_start(command_id):
     command_id = command_id.strip()
     variables = EnvInit.COMMAND_DETACHED_FILENAME
     start_py_path = str(Path(".").absolute()) + "/start.py"
@@ -444,35 +474,32 @@ def get_results_folder():
 
 @app.route('/commanddetached', methods=['DELETE'])
 def command_detached_stop():
-    io_utils = IOUtils()
     process_utils = ProcessUtils(logger)
     http = HttpResponse()
-    command_id = json.loads(io_utils.read_file(EnvInit.COMMAND_DETACHED_FILENAME))["id"]
+    process_name = "start.py"
 
     try:
-        response = get_command_detached_info()
-        pid = json.loads(response.get_data()).get('description').get('pid')
-        if not isinstance(pid, str):
-            if psutil.pid_exists(int(pid)):
-                parent = psutil.Process()
+        process_list = ProcessUtils.get_procs_by_name(process_name)
+        for pid in process_list:
+            parent = psutil.Process(pid)
 
-                children = parent.children()
-                for p in children:
-                    p.terminate()
-                _, alive = psutil.wait_procs(children, timeout=3, callback=process_utils.on_terminate)
-                for p in alive:
-                    p.kill()
+            children = parent.children()
+            for p in children:
+                p.terminate()
+            _, alive = psutil.wait_procs(children, timeout=3, callback=process_utils.on_terminate)
+            for p in alive:
+                p.kill()
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE) % command_id,
+                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE),
                                                  description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
         json.dumps(
             http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                          description=command_id)),
+                          description=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))),
         200,
         mimetype="application/json")
 

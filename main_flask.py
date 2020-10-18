@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 import multiprocessing
-import os
 import sys
 from pathlib import Path
 
 from rest.api.constants.env_constants import EnvConstants
 from rest.api.constants.env_init import EnvInit
-from rest.api.definitions import command_detached_init
 from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.routes import fluentd_utils, app
 from rest.environment.environment import EnvironmentSingleton
@@ -33,14 +31,7 @@ if __name__ == "__main__":
 
     io_utils.create_dir(Path(EnvInit.TEMPLATES_DIR))
     io_utils.create_dir(Path(EnvInit.VARS_DIR))
-
-    file = EnvInit.COMMAND_DETACHED_FILENAME
-
-    try:
-        command_detached_init["pid"] = os.getpid()
-        io_utils.write_to_file_dict(Path(file), command_detached_init)
-    except Exception as e:
-        raise e
+    io_utils.create_dir(Path(EnvInit.CMD_DETACHED_DIR))
 
     environ_dump = message_dumper.dump_message(EnvironmentSingleton.get_instance().get_env_and_virtual_env())
     ip_port_dump = message_dumper.dump_message({"host": host, "port": port})

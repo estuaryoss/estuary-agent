@@ -29,5 +29,5 @@ class EnvInit:
         app.logger.debug({"msg":
                               f"{EnvConstants.TEMPLATES_DIR} env var not set, defaulting to : " + env.get_env_and_virtual_env().get(
                                   EnvConstants.TEMPLATES_DIR)})
-
-    COMMAND_DETACHED_FILENAME = "command_detached_info.json"
+    CMD_DETACHED_DIR = "cmds"
+    COMMAND_DETACHED_FILENAME = CMD_DETACHED_DIR + "/cmd_info_{}.json"

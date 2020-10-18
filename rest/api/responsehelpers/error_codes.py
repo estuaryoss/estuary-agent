@@ -7,7 +7,7 @@ class ErrorCodes:
         ApiCodeConstants.JINJA2_RENDER_FAILURE: "Jinja2 render failed",
         ApiCodeConstants.GET_FILE_FAILURE: "Getting file or folder from the estuary agent service container failed",
         ApiCodeConstants.COMMAND_DETACHED_START_FAILURE: "Starting detached command with id %s failed",
-        ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE: "Stopping running detached command %s failed",
+        ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE: "Stopping running detached commands failed",
         ApiCodeConstants.GET_FILE_FAILURE_IS_DIR: "Getting %s from the container %s failed. It is a directory, not a file.",
         ApiCodeConstants.GET_ENV_VAR_FAILURE: "Getting env var %s from the container failed.",
         ApiCodeConstants.MISSING_PARAMETER_POST: "Body parameter \"%s\" sent in request missing. Please include parameter. E.g. {\"parameter\": \"value\"}",
