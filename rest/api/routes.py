@@ -14,6 +14,7 @@ from about import properties
 from rest.api import AppCreatorSingleton
 from rest.api.command.command_in_memory import CommandInMemory
 from rest.api.command.command_in_parallel import CommandInParallel
+from rest.api.command.command_streamer import CommandStreamer
 from rest.api.constants.api_code_constants import ApiCodeConstants
 from rest.api.constants.env_constants import EnvConstants
 from rest.api.constants.env_init import EnvInit
