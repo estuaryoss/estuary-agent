@@ -14,8 +14,12 @@ class ProcessUtils:
         self.message_dumper = MessageDumper()
 
     def on_terminate(self, proc):
-        self.fluentd_utils.emit(tag="api", msg=self.message_dumper.dump_message(
+        self.fluentd_utils.emit(tag="process", msg=self.message_dumper.dump_message(
             {"proc": str(proc), "returncode": proc.returncode}))
+
+    def log_process_err(self, proc, err=""):
+        self.fluentd_utils.emit(tag="process", msg=self.message_dumper.dump_message(
+            {"proc": str(proc), "error": err}))
 
     @staticmethod
     def find_procs_by_name(name):
@@ -41,7 +45,10 @@ class ProcessUtils:
         if include_parent:
             children.append(parent)
         for p in children:
-            p.send_signal(sig)
+            try:
+                p.send_signal(sig)
+            except Exception as e:
+                self.log_process_err(proc=p, err=e.__str__())
         gone, alive = psutil.wait_procs(children, timeout=timeout, callback=self.on_terminate)
 
-        return (gone, alive)
+        return gone, alive
