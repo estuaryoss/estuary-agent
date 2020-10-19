@@ -477,7 +477,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_gettestinfo_repeated_should_return_always_200_p(self, payload):
         test_id = "102"
         data_payload = f"sleep {payload} \n sleep {payload}"
-        repetitions = 100
+        repetitions = 10
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
