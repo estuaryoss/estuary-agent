@@ -28,7 +28,7 @@ class ProcessUtils:
                 ls.append(p)
         return ls
 
-    def kill_proc_tree(self, sig=signal.SIGTERM, include_parent=False, timeout=None):
+    def kill_proc_tree(self, sig=signal.SIGTERM, include_parent=False, timeout=5):
 
         """Kill a process tree (including grandchildren) with signal
         "sig" and return a (gone, still_alive) tuple.
