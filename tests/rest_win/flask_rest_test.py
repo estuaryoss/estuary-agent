@@ -493,6 +493,16 @@ class FlaskServerTestCase(unittest.TestCase):
         end = time.time()
         print(f"made {repetitions} gettestinfo repetitions in {end - start} s")
 
+    def test_get_command_detached_id_does_not_exist(self):
+        test_id = "this_id_does_not_exist"
+        response = requests.get(self.server + f"/commanddetached/{test_id}")
+        body = response.json()
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(body.get('code'), ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE)
+        self.assertEqual(body.get('message'),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE))
+        self.assertIn("Exception", body.get('description'))
+
     def test_teststop_p(self):
         test_id = "100"
         data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"

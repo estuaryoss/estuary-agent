@@ -238,11 +238,8 @@ def get_cmd_detached_info_id(command_id):
     file = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
 
     try:
-        file_path = Path(file)
-        if not file_path.is_file():
-            io_utils.write_to_file_dict(file, command_detached_init)
-        command_detached_vars = json.loads(io_utils.read_file(file))
-        command_detached_vars["processes"] = [p.info for p in
+        cmd_detached_response = json.loads(io_utils.read_file(file))
+        cmd_detached_response["processes"] = [p.info for p in
                                               psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
     except Exception as e:
@@ -254,7 +251,7 @@ def get_cmd_detached_info_id(command_id):
     return Response(
         json.dumps(
             http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                          description=command_detached_vars)),
+                          description=cmd_detached_response)),
         200,
         mimetype="application/json")
 
@@ -473,21 +470,9 @@ def get_results_folder():
 def command_detached_stop():
     process_utils = ProcessUtils(logger)
     http = HttpResponse()
-    process_name = "start.py"
 
     try:
-        process_list = ProcessUtils.get_procs_by_name(process_name)
-        for pid in process_list:
-            parent = psutil.Process(pid)
-
-            children = parent.children()
-            for p in children:
-                p.terminate()
-            _, alive = psutil.wait_procs(children, timeout=3, callback=process_utils.on_terminate)
-            for p in alive:
-                p.kill()
-            parent.kill()
-
+        process_utils.kill_proc_tree()
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(

@@ -1,4 +1,5 @@
 import os
+import signal
 
 import psutil
 
@@ -17,18 +18,30 @@ class ProcessUtils:
             {"proc": str(proc), "returncode": proc.returncode}))
 
     @staticmethod
-    def get_procs_by_name(name):
+    def find_procs_by_name(name):
         """ Return a list of processes matching 'name' """
-        process_list = []
-        for p in psutil.process_iter():
-            p_as_dict_, pid_ = "", 0
-            try:
-                p_as_dict_ = str(p.as_dict())
-                pid_ = p.pid
-            except (psutil.AccessDenied, psutil.ZombieProcess):
-                pass
-            except psutil.NoSuchProcess:
-                continue
-            if name in p_as_dict_:
-                process_list.append(pid_)
-        return process_list
+        ls = []
+        for p in psutil.process_iter(["name", "exe", "cmdline"]):
+            if name == p.info['name'] or \
+                    p.info['exe'] and os.path.basename(p.info['exe']) == name or \
+                    p.info['cmdline'] and p.info['cmdline'][0] == name:
+                ls.append(p)
+        return ls
+
+    def kill_proc_tree(self, sig=signal.SIGTERM, include_parent=False, timeout=None):
+
+        """Kill a process tree (including grandchildren) with signal
+        "sig" and return a (gone, still_alive) tuple.
+        "on_terminate", if specified, is a callback function which is
+        called as soon as a child terminates.
+        """
+
+        parent = psutil.Process(os.getpid())
+        children = parent.children(recursive=True)
+        if include_parent:
+            children.append(parent)
+        for p in children:
+            p.send_signal(sig)
+        gone, alive = psutil.wait_procs(children, timeout=timeout, callback=self.on_terminate)
+
+        return (gone, alive)
