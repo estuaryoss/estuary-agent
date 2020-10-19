@@ -3,7 +3,7 @@ swagger_file_content = '''
 info:
   description: |
     Estuary agent which will run your shell commands via REST API
-  version: "4.1.0"
+  version: 4.2.0
   title: estuary-agent
   termsOfService: http://swagger.io/terms/
   contact:
@@ -229,6 +229,31 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
   /commanddetached/{id}:
+    get:
+      tags:
+        - estuary-agent
+      summary: Gets the command info for specific id
+      produces:
+        - application/json
+      parameters:
+      - in: header
+        name: Token
+        type: string
+        required: false
+      - name: id
+        in: path
+        description: Command detached id set by the user
+        required: true
+        type: string
+      responses:
+        200:
+          description: get command info success
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: get command info failure
+          schema:
+            $ref: "#/definitions/ApiResponse"
     post:
       tags:
         - estuary-agent
@@ -286,7 +311,7 @@ paths:
     delete:
       tags:
         - estuary-agent
-      summary: Stops all detached commands previously started
+      summary: Stops all detached commands previously started and deletes their corresponding processes
       produces:
         - application/json
       parameters:
@@ -296,11 +321,11 @@ paths:
         required: false
       responses:
         200:
-          description: command detached stop success
+          description: Stop all backgroud commands success
           schema:
             $ref: "#/definitions/ApiResponse"
         500:
-          description: command detached stop failure
+          description: Stop all backgroud commands failure
           schema:
             $ref: "#/definitions/ApiResponse"
   /file:

@@ -30,6 +30,7 @@ from rest.model.config_descriptor import ConfigDescriptor
 from rest.model.config_loader import ConfigLoader
 from rest.service.fluentd import Fluentd
 from rest.service.restapi import RestApi
+from rest.state.state_holder import StateHolder
 from rest.utils.cmd_utils import CmdUtils
 from rest.utils.env_startup import EnvStartupSingleton
 from rest.utils.io_utils import IOUtils
@@ -158,39 +159,10 @@ def get_content_with_env(template, variables):
     return response
 
 
-@app.route('/commanddetached', methods=['GET'])
-def get_command_detached_info():
-    http = HttpResponse()
-    io_utils = IOUtils()
-    file = EnvInit.COMMAND_DETACHED_FILENAME
-
-    try:
-        file_path = Path(file)
-        if not file_path.is_file():
-            io_utils.write_to_file_dict(file, command_detached_init)
-        command_detached_vars = json.loads(io_utils.read_file(file))
-        command_detached_vars["processes"] = [p.info for p in
-                                              psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
-
-    except Exception as e:
-        return Response(json.dumps(http.response(code=ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE,
-                                                 message=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE),
-                                                 description="Exception({})".format(e.__str__()))), 500,
-                        mimetype="application/json")
-    return Response(
-        json.dumps(
-            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                          description=command_detached_vars)),
-        200,
-        mimetype="application/json")
-
-
 @app.route('/env', methods=['POST'])
 def set_env():
     http = HttpResponse()
     input_data = request.data.decode("UTF-8", "replace").strip()
-    env_vars_added = {}
 
     try:
         env_vars_attempted = json.loads(input_data)
@@ -231,13 +203,63 @@ def get_env(name):
                       env.get_env_and_virtual_env().get(name))), 200, mimetype="application/json")
 
 
-@app.route('/commanddetached/<command_id>', methods=['POST', 'PUT'])
-def command_detached_start(command_id):
+@app.route('/commanddetached', methods=['GET'])
+def get_cmd_detached_info():
+    http = HttpResponse()
+    io_utils = IOUtils()
+
+    try:
+        file = StateHolder.get_last_command()
+        if not Path(file).is_file():
+            io_utils.write_to_file_dict(file, command_detached_init)
+        cmd_detached_response = json.loads(io_utils.read_file(file))
+        cmd_detached_response["processes"] = [p.info for p in
+                                              psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
+
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+    return Response(
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=cmd_detached_response)),
+        200,
+        mimetype="application/json")
+
+
+@app.route('/commanddetached/<command_id>', methods=['GET'])
+def get_cmd_detached_info_id(command_id):
     command_id = command_id.strip()
-    variables = EnvInit.COMMAND_DETACHED_FILENAME
+    http = HttpResponse()
+    io_utils = IOUtils()
+    file = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
+
+    try:
+        cmd_detached_response = json.loads(io_utils.read_file(file))
+        cmd_detached_response["processes"] = [p.info for p in
+                                              psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
+
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+    return Response(
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=cmd_detached_response)),
+        200,
+        mimetype="application/json")
+
+
+@app.route('/commanddetached/<command_id>', methods=['POST', 'PUT'])
+def cmd_detached_start(command_id):
+    command_id = command_id.strip()
     start_py_path = str(Path(".").absolute()) + "/start.py"
-    env.set_env_var(EnvConstants.TEMPLATE, "start.py")
-    env.set_env_var(EnvConstants.VARIABLES, variables)
     command = []
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
@@ -254,7 +276,9 @@ def command_detached_start(command_id):
     try:
         input_data_list = input_data.split("\n")
         command_detached_init["id"] = command_id
-        io_utils.write_to_file_dict(EnvInit.COMMAND_DETACHED_FILENAME, command_detached_init)
+        file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
+        StateHolder.set_last_command(file_path)
+        io_utils.write_to_file_dict(file_path, command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
         command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
         command.insert(0, command_id)  # first arg is test id
@@ -444,35 +468,22 @@ def get_results_folder():
 
 @app.route('/commanddetached', methods=['DELETE'])
 def command_detached_stop():
-    io_utils = IOUtils()
     process_utils = ProcessUtils(logger)
     http = HttpResponse()
-    command_id = json.loads(io_utils.read_file(EnvInit.COMMAND_DETACHED_FILENAME))["id"]
 
     try:
-        response = get_command_detached_info()
-        pid = json.loads(response.get_data()).get('description').get('pid')
-        if not isinstance(pid, str):
-            if psutil.pid_exists(int(pid)):
-                parent = psutil.Process()
-
-                children = parent.children()
-                for p in children:
-                    p.terminate()
-                _, alive = psutil.wait_procs(children, timeout=3, callback=process_utils.on_terminate)
-                for p in alive:
-                    p.kill()
+        process_utils.kill_proc_tree()
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE) % command_id,
+                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE),
                                                  description="Exception({})".format(e.__str__()))), 500,
                         mimetype="application/json")
 
     return Response(
         json.dumps(
             http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                          description=command_id)),
+                          description=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))),
         200,
         mimetype="application/json")
 

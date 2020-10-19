@@ -20,7 +20,7 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 [centos](https://hub.docker.com/r/estuaryoss/agent-centos)  ![](https://img.shields.io/docker/pulls/estuaryoss/agent-centos.svg)
 
 ## Api docs
-[4.1.0](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.1.0)
+[4.2.0](https://app.swaggerhub.com/apis/dinuta/estuary-testrunner/4.2.0)
 
 ## Postman collection
 [Postman](https://documenter.getpostman.com/view/2360061/SVYrrdGe?version=latest)
@@ -30,8 +30,11 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 
 ## Compile on Alpine 
 ```bash
-docker run --rm -v "${PWD}:/src" six8/pyinstaller-alpine --noconfirm --onefile --log-level DEBUG --clean main_flask.py
-docker run --rm -v "${PWD}:/src" six8/pyinstaller-alpine --noconfirm --onefile --log-level DEBUG --clean start.py
+docker run --rm -v "${PWD}:/src" six8/pyinstaller-alpine --noconfirm --onefile --clean --log-level DEBUG main_flask.py
+docker run --rm -v "${PWD}:/src" six8/pyinstaller-alpine --noconfirm --onefile --clean --log-level DEBUG start.py
+
+docker run --rm -v "${PWD}:/src" cdrx/pyinstaller-linux "pyistaller main_flask.py"
+docker run --rm -v "${PWD}:/src" cdrx/pyinstaller-linux "pyinstaller start.py
 ```
 
 ## General use cases:

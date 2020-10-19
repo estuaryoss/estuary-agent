@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 import json
+import os
 import sys
+from pathlib import Path
 
 from rest.api.command.command import Command
 from rest.api.constants.env_init import EnvInit
+from rest.api.definitions import command_detached_init
 from rest.utils.io_utils import IOUtils
 
 if __name__ == '__main__':
     io_utils = IOUtils()
     command_logger_path = "command_info_logger.txt"
-    file_path = EnvInit.COMMAND_DETACHED_FILENAME
 
     io_utils.append_to_file(command_logger_path, " ".join(sys.argv[:-1]) + f" \"{sys.argv[-1]}\"")
 
@@ -20,6 +22,13 @@ if __name__ == '__main__':
 
     test_id = sys.argv[1]
     commands_list = sys.argv[2].split(";")
+    file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(test_id)
+
+    try:
+        command_detached_init["pid"] = os.getpid()
+        io_utils.write_to_file_dict(Path(file_path), command_detached_init)
+    except Exception as e:
+        raise e
 
     test_runner = Command()
     dictionary = test_runner.run_commands(file_path, test_id, commands_list)

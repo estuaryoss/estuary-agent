@@ -1,7 +1,7 @@
-FROM alpine:3.11
+FROM alpine:3.11.6
 
 RUN apk add --no-cache python3 && \
-    pip3 install --upgrade pip==20.2.3 setuptools==46.2.0 --no-cache
+    pip3 install --upgrade pip==20.2.4 setuptools==46.2.0 --no-cache
 
 RUN apk add --no-cache \
     bash \
@@ -38,11 +38,11 @@ ENV HTTP_AUTH_TOKEN None
 ENV PORT 8080
 ENV TZ UTC
 
-COPY ./ $SCRIPTS_DIR/
 COPY https/key.pem $HTTPS_DIR/
 COPY https/cert.pem $HTTPS_DIR/
 COPY inputs/templates/ $TEMPLATES_DIR/
 COPY inputs/variables/ $VARS_DIR/
+COPY ./ $SCRIPTS_DIR/
 
 RUN chmod +x $SCRIPTS_DIR/*.py
 RUN chmod +x $SCRIPTS_DIR/*.sh
