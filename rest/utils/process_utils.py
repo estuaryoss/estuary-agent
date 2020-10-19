@@ -21,14 +21,14 @@ class ProcessUtils:
         """ Return a list of processes matching 'name' """
         process_list = []
         for p in psutil.process_iter():
-            name_, pid_ = "", 0
+            p_as_dict_, pid_ = "", 0
             try:
-                name_ = p.name()
+                p_as_dict_ = str(p.as_dict())
                 pid_ = p.pid
             except (psutil.AccessDenied, psutil.ZombieProcess):
                 pass
             except psutil.NoSuchProcess:
                 continue
-            if name == name_:
+            if name in p_as_dict_:
                 process_list.append(pid_)
         return process_list

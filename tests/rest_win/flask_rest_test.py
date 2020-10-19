@@ -510,7 +510,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), test_id)
         time.sleep(4)
-        response = requests.get(self.server + "/commanddetached")
+        response = requests.get(self.server + f"/commanddetached/{test_id}")
         body = response.json()
         self.assertEqual(body.get('description').get("id"), test_id)
         self.assertEqual(body.get('description').get("started"), True)

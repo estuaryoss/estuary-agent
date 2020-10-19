@@ -486,6 +486,8 @@ def command_detached_stop():
             _, alive = psutil.wait_procs(children, timeout=3, callback=process_utils.on_terminate)
             for p in alive:
                 p.kill()
+            parent.kill()
+
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
