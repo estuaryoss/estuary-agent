@@ -97,3 +97,8 @@ class IOUtils:
         if not file_path.exists():
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
         shutil.make_archive(f"/tmp/{name}", 'zip', f"{path}")
+
+    @staticmethod
+    def create_files(files):
+        for file in files:
+            IOUtils.create_file(file)

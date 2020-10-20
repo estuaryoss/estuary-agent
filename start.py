@@ -20,9 +20,12 @@ if __name__ == '__main__':
         raise Exception(
             "Error: Expecting at least {} args. Got {}, args={}".format(min_args, len(sys.argv), sys.argv))
 
-    test_id = sys.argv[1]
+    IOUtils.create_dir(EnvInit.CMD_DETACHED_DIR)
+    IOUtils.create_dir(EnvInit.CMD_DETACHED_STREAMS)
+
+    command_id = sys.argv[1]
     commands_list = sys.argv[2].split(";")
-    file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(test_id)
+    file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
 
     try:
         command_detached_init["pid"] = os.getpid()
@@ -30,8 +33,8 @@ if __name__ == '__main__':
     except Exception as e:
         raise e
 
-    test_runner = Command()
-    dictionary = test_runner.run_commands(file_path, test_id, commands_list)
+    command_runner = Command()
+    dictionary = command_runner.run_commands(file_path, command_id, commands_list)
     dictionary = io_utils.read_dict_from_file(file_path)
 
     print(json.dumps(dictionary) + "\n")

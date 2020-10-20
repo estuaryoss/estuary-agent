@@ -33,8 +33,8 @@ Estuary agent is a service that exposes your cli commands/app via REST API.
 docker run --rm -v "${PWD}:/src" six8/pyinstaller-alpine --noconfirm --onefile --clean --log-level DEBUG main_flask.py
 docker run --rm -v "${PWD}:/src" six8/pyinstaller-alpine --noconfirm --onefile --clean --log-level DEBUG start.py
 
-docker run --rm -v "${PWD}:/src" cdrx/pyinstaller-linux "pyistaller main_flask.py"
-docker run --rm -v "${PWD}:/src" cdrx/pyinstaller-linux "pyinstaller start.py
+docker run --rm -v "${PWD}:/src" cdrx/pyinstaller-linux "pyinstaller --onefile --clean main_flask.py"
+docker run --rm -v "${PWD}:/src" cdrx/pyinstaller-linux "pyinstaller --onefile --clean start.py
 ```
 
 ## General use cases:

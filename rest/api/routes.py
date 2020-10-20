@@ -12,9 +12,9 @@ from fluent import sender
 
 from about import properties
 from rest.api import AppCreatorSingleton
+from rest.api.command.command_hasher import CommandHasher
 from rest.api.command.command_in_memory import CommandInMemory
 from rest.api.command.command_in_parallel import CommandInParallel
-from rest.api.command.command_streamer import CommandStreamer
 from rest.api.constants.api_code_constants import ApiCodeConstants
 from rest.api.constants.env_constants import EnvConstants
 from rest.api.constants.env_init import EnvInit
@@ -214,6 +214,12 @@ def get_cmd_detached_info():
         if not Path(file).is_file():
             io_utils.write_to_file_dict(file, command_detached_init)
         cmd_detached_response = json.loads(io_utils.read_file(file))
+        command_keys = cmd_detached_response.get('commands').keys()
+        for key in command_keys:
+            cmd_detached_response["commands"][key]["details"]["out"] = \
+                IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, ".out"))
+            cmd_detached_response["commands"][key]["details"]["err"] = \
+                IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, ".err"))
         cmd_detached_response["processes"] = [p.info for p in
                                               psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
@@ -278,13 +284,13 @@ def cmd_detached_start(command_id):
         input_data_list = input_data.split("\n")
         command_detached_init["id"] = command_id
         file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
-        StateHolder.set_last_command(file_path)
+        StateHolder.set_last_command(command_id)
         io_utils.write_to_file_dict(file_path, command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
         command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
         command.insert(0, command_id)  # first arg is test id
         command.insert(0, start_py_path)
-        # final_command.insert(0, "python")
+        command.insert(0, "python")
         cmd_utils.run_cmd_detached(command)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
@@ -517,8 +523,6 @@ def get_results_folder():
 
 @app.route('/command', methods=['POST', 'PUT'])
 def execute_command():
-    env.set_env_var(EnvConstants.TEMPLATE, "start.py")
-    env.set_env_var(EnvConstants.VARIABLES, "commandinfo.json")
     http = HttpResponse()
     input_data = request.data.decode("UTF-8", "replace").strip()
 
@@ -530,8 +534,7 @@ def execute_command():
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 500,
                         mimetype="application/json")
     try:
-        input_data_list = input_data.split("\n")
-        input_data_list = list(map(lambda x: x.strip(), input_data_list))
+        input_data_list = [x.strip() for x in input_data.split("\n")]
         command_in_memory = CommandInMemory()
         response = command_in_memory.run_commands(input_data_list)
     except Exception as e:
@@ -642,8 +645,7 @@ def execute_command_parallel():
                                                      ApiCodeConstants.EMPTY_REQUEST_BODY_PROVIDED))), 500,
                         mimetype="application/json")
     try:
-        input_data_list = input_data.split("\n")
-        input_data_list = list(map(lambda x: x.strip(), input_data_list))
+        input_data_list = [x.strip() for x in input_data.split("\n")]
         command_in_parallel = CommandInParallel()
         response = command_in_parallel.run_commands(input_data_list)
     except Exception as e:

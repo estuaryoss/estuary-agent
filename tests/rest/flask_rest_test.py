@@ -380,7 +380,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_get_command_info(self, payload):
         test_id = "103"
         data_payload = f" sleep {payload} \n invalid_command"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
@@ -497,7 +497,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_gettestinfo_rm_commands_200_p(self):
         test_id = "101"
         data_payload = f"rm -rf /etc \n ls -lrt \n colrm doesnotmatter"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
@@ -528,7 +528,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_command_stop_p(self):
         test_id = "100"
         data_payload = f"sleep 7 \n sleep 3600 \n sleep 3601"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(

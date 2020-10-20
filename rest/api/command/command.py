@@ -1,7 +1,5 @@
 import datetime
 import os
-import platform
-import shlex
 
 from rest.api.definitions import command_detached_init
 from rest.utils.cmd_utils import CmdUtils
@@ -17,7 +15,7 @@ class Command:
 
     def run_commands(self, json_file, test_id, commands):
         start_time = datetime.datetime.now()
-        commands = list(map(lambda item: item.strip(), commands))
+        commands = [item.strip() for item in commands]
 
         self.command_dict['id'] = str(test_id)
         self.command_dict['pid'] = os.getpid()
@@ -25,6 +23,7 @@ class Command:
         self.command_dict["started"] = True
         self.command_dict["commands"] = input_data_dict
         self.command_dict["startedat"] = str(datetime.datetime.now())
+        self.__io_utils.write_to_file_dict(json_file, self.command_dict)
 
         self.__run_commands(commands, json_file=json_file)
 
@@ -47,13 +46,9 @@ class Command:
             self.command_dict['commands'][command]['status'] = status_in_progress
             self.command_dict['commands'][command]['startedat'] = str(start)
             self.__io_utils.write_to_file_dict(json_file, self.command_dict)
-            try:
-                if platform.system() == "Windows":
-                    details[command] = self.__cmd_utils.run_cmd_shell_true(shlex.split(command))
-                else:
-                    details[command] = self.__cmd_utils.run_cmd_shell_true([command])
-            except Exception as e:
-                details[command] = "Exception({0})".format(e.__str__())
+
+            details[command] = self.__cmd_utils.run_cmd_shell_false_to_file([rf"{command}"])
+
             self.command_dict['commands'][command]['status'] = status_finished
             end = datetime.datetime.now()
             self.command_dict['commands'][command]['finishedat'] = str(end)

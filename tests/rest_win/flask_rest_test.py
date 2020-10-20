@@ -380,7 +380,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_gettestinfo_p(self, payload):
         test_id = "103"
         data_payload = f" ping -n {payload} 127.0.0.1 \n invalid_command"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
@@ -506,7 +506,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_command_stop_p(self):
         test_id = "100"
         data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.delete(self.server + "/commanddetached")
