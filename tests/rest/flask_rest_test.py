@@ -598,7 +598,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description'), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         time.sleep(1)
         response = requests.get(self.server + f"/commanddetached/{test_id}")
-        response2 = requests.get(self.server + f"/commanddetached/{test_id}")
+        response2 = requests.get(self.server + f"/commanddetached/{test_id2}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response2.status_code, 200)
         body = response.json()
