@@ -605,8 +605,8 @@ class FlaskServerTestCase(unittest.TestCase):
         body2 = response2.json()
         pid = body.get('description').get("pid")
         pid2 = body2.get('description').get("pid")
-        self.assertNotIn(pid, json.dumps(body.get('description').get('processes')))
-        self.assertIn(pid2, json.dumps(body.get('description').get('processes')))
+        self.assertNotIn(str(pid), json.dumps(body.get('description').get('processes')))
+        self.assertIn(str(pid2), json.dumps(body.get('description').get('processes')))
 
     def test_command_stop_id_does_not_exist(self):
         test_id = "this_id_does_not_exist"
