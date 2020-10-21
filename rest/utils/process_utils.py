@@ -32,7 +32,7 @@ class ProcessUtils:
                 ls.append(p)
         return ls
 
-    def kill_proc_tree(self, sig=signal.SIGTERM, include_parent=False, timeout=5):
+    def kill_proc_tree(self, pid=os.getpid(), sig=signal.SIGTERM, include_parent=False, timeout=5):
 
         """Kill a process tree (including grandchildren) with signal
         "sig" and return a (gone, still_alive) tuple.
@@ -40,7 +40,7 @@ class ProcessUtils:
         called as soon as a child terminates.
         """
 
-        parent = psutil.Process(os.getpid())
+        parent = psutil.Process(pid=pid)
         children = parent.children(recursive=True)
         if include_parent:
             children.append(parent)

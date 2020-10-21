@@ -299,6 +299,54 @@ def cmd_detached_start(command_id):
         mimetype="application/json")
 
 
+@app.route('/commanddetached', methods=['DELETE'])
+def command_detached_stop():
+    process_utils = ProcessUtils(logger)
+    http = HttpResponse()
+
+    try:
+        process_utils.kill_proc_tree()
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+
+    return Response(
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))),
+        200,
+        mimetype="application/json")
+
+
+@app.route('/commanddetached/<command_id>', methods=['DELETE'])
+def command_detached_stop_by_id(command_id):
+    command_id = command_id.strip()
+    process_utils = ProcessUtils(logger)
+    http = HttpResponse()
+    io_utils = IOUtils()
+    file = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
+
+    try:
+        cmd_detached_response = json.loads(io_utils.read_file(file))
+        process_utils.kill_proc_tree(pid=cmd_detached_response.get('pid'), include_parent=True)
+    except Exception as e:
+        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
+                                                 message=ErrorCodes.HTTP_CODE.get(
+                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE),
+                                                 description="Exception({})".format(e.__str__()))), 500,
+                        mimetype="application/json")
+
+    return Response(
+        json.dumps(
+            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
+                          description=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))),
+        200,
+        mimetype="application/json")
+
+
 @app.route('/commanddetachedyaml/<command_id>', methods=['POST', 'PUT'])
 def command_detached_start_yaml(command_id):
     command_id = command_id.strip()
@@ -464,28 +512,6 @@ def get_results_folder():
         f"/tmp/{archive_name}.zip",
         mimetype='application/zip',
         as_attachment=True), 200
-
-
-@app.route('/commanddetached', methods=['DELETE'])
-def command_detached_stop():
-    process_utils = ProcessUtils(logger)
-    http = HttpResponse()
-
-    try:
-        process_utils.kill_proc_tree()
-    except Exception as e:
-        return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
-                                                 message=ErrorCodes.HTTP_CODE.get(
-                                                     ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE),
-                                                 description="Exception({})".format(e.__str__()))), 500,
-                        mimetype="application/json")
-
-    return Response(
-        json.dumps(
-            http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                          description=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))),
-        200,
-        mimetype="application/json")
 
 
 @app.route('/command', methods=['POST', 'PUT'])

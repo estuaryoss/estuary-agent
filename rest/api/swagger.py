@@ -287,6 +287,31 @@ paths:
           description: commands start failure
           schema:
             $ref: "#/definitions/ApiResponse"
+    delete:
+      tags:
+        - estuary-agent
+      summary: Stops the detached command previously started and deletes the corresponding processes
+      produces:
+        - application/json
+      parameters:
+      - in: header
+        name: Token
+        type: string
+        required: false
+      - name: id
+        in: path
+        description: Command detached id set by the user
+        required: true
+        type: string
+      responses:
+        200:
+          description: delete command success
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: delete command failure
+          schema:
+            $ref: "#/definitions/ApiResponse"
   /commanddetached:
     get:
       tags:
@@ -311,7 +336,7 @@ paths:
     delete:
       tags:
         - estuary-agent
-      summary: Stops all detached commands previously started and deletes their corresponding processes
+      summary: Stops all the detached commands previously started and deletes all corresponding processes
       produces:
         - application/json
       parameters:
