@@ -503,7 +503,7 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorCodes.HTTP_CODE.get(ApiCodeConstants.GET_COMMAND_DETACHED_INFO_FAILURE))
         self.assertIn("Exception", body.get('description'))
 
-    def test_teststop_p(self):
+    def test_command_stop_p(self):
         test_id = "100"
         data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"
         commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
@@ -540,6 +540,64 @@ class FlaskServerTestCase(unittest.TestCase):
         # self.assertEqual(body.get('description').get("finished"), True)
         self.assertEqual(body.get('description').get("id"), f"{test_id}")
         # self.assertEqual(body.get('description').get("started"), False)
+
+    def test_command_stop_by_id_p(self):
+        test_id = "100"
+        test_id2 = "101"
+        data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"
+        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        headers = {'Content-type': 'text/plain'}
+
+        response = requests.post(
+            self.server + f"/commanddetached/{test_id}",
+            data=f"{data_payload}", headers=headers)
+        response2 = requests.post(
+            self.server + f"/commanddetached/{test_id2}",
+            data=f"{data_payload}", headers=headers)
+        body = response.json()
+        body2 = response2.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+        self.assertEqual(body.get('description'), test_id)
+        self.assertEqual(body2.get('description'), test_id2)
+        time.sleep(2)
+        response = requests.get(self.server + f"/commanddetached/{test_id}")
+        response2 = requests.get(self.server + f"/commanddetached/{test_id2}")
+        body = response.json()
+        body2 = response2.json()
+        self.assertEqual(body.get('description').get("id"), test_id)
+        self.assertEqual(body2.get('description').get("id"), test_id2)
+        self.assertEqual(body.get('description').get("started"), True)
+        self.assertEqual(body.get('description').get("finished"), False)
+        self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
+        self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "scheduled")
+        self.assertEqual(body.get('description').get("commands").get(commands[2]).get("status"), "scheduled")
+        time.sleep(2)
+        response = requests.delete(self.server + f"/commanddetached/{test_id}")
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body.get('description'), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        time.sleep(1)
+        response = requests.get(self.server + f"/commanddetached/{test_id}")
+        response2 = requests.get(self.server + f"/commanddetached/{test_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+        body = response.json()
+        body2 = response2.json()
+        pid = body.get('description').get("pid")
+        pid2 = body2.get('description').get("pid")
+        self.assertNotIn(pid, json.dumps(body.get('description').get('processes')))
+        self.assertIn(pid2, json.dumps(body.get('description').get('processes')))
+
+    def test_command_stop_id_does_not_exist(self):
+        test_id = "this_id_does_not_exist"
+        response = requests.delete(self.server + f"/commanddetached/{test_id}")
+        body = response.json()
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(body.get('code'), ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE)
+        self.assertEqual(body.get('message'),
+                         ErrorCodes.HTTP_CODE.get(ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE))
+        self.assertIn("Exception", body.get('description'))
 
     @parameterized.expand([
         "{\"file\": \"/dummy/config.properties\", \"content\": \"ip=10.0.0.1\\nrequest_sec=100\\nthreads=10\\ntype=dual\"}"
