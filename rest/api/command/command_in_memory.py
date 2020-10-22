@@ -1,5 +1,7 @@
 import datetime
 import os
+import platform
+import shlex
 
 from rest.api.definitions import command_detached_init
 from rest.utils.cmd_utils import CmdUtils
@@ -42,7 +44,10 @@ class CommandInMemory:
             self.command_dict['commands'][command]['status'] = status_in_progress
             self.command_dict['commands'][command]['startedat'] = str(start_time)
 
-            details[command] = self.__cmd_utils.run_cmd_shell_false([rf"{command}"])
+            if platform.system() == "Windows":
+                details[command] = self.__cmd_utils.run_cmd_shell_true(shlex.split(command))
+            else:
+                details[command] = self.__cmd_utils.run_cmd_shell_true([command])
 
             self.command_dict['commands'][command]['status'] = status_finished
             end_time = datetime.datetime.now()
