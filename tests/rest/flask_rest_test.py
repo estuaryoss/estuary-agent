@@ -431,7 +431,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("details").get("err"), "")
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("code"), int)
-        self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("args"), list)
+        self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("args"), str)
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "finished")
         self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get("startedat"), "none")
         self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get("finishedat"), "none")
@@ -440,7 +440,7 @@ class FlaskServerTestCase(unittest.TestCase):
                       body.get('description').get("commands").get(commands[1]).get("details").get("err"))
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
-        self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), list)
+        self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), str)
 
     def test_get_commandyaml_info(self):
         test_id = "yaml"

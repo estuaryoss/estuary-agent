@@ -217,10 +217,13 @@ def get_cmd_detached_info():
         cmd_id = cmd_detached_response.get('id')
         command_keys = cmd_detached_response.get('commands').keys()
         for key in command_keys:
-            cmd_detached_response["commands"][key]["details"]["out"] = \
-                IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".out"))
-            cmd_detached_response["commands"][key]["details"]["err"] = \
-                IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".err"))
+            try:  # because files might not be created yet
+                cmd_detached_response["commands"][key]["details"]["out"] = \
+                    IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".out"))
+                cmd_detached_response["commands"][key]["details"]["err"] = \
+                    IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".err"))
+            except Exception as e:
+                app.logger.debug("Exception({})".format(e.__str__()))
         cmd_detached_response["processes"] = [p.info for p in
                                               psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
@@ -240,7 +243,7 @@ def get_cmd_detached_info():
 
 @app.route('/commanddetached/<command_id>', methods=['GET'])
 def get_cmd_detached_info_id(command_id):
-    command_id = command_id.strip()
+    cmd_id = command_id.strip()
     http = HttpResponse()
     io_utils = IOUtils()
     file = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
@@ -249,10 +252,13 @@ def get_cmd_detached_info_id(command_id):
         cmd_detached_response = json.loads(io_utils.read_file(file))
         command_keys = cmd_detached_response.get('commands').keys()
         for key in command_keys:
-            cmd_detached_response["commands"][key]["details"]["out"] = \
-                IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, command_id, ".out"))
-            cmd_detached_response["commands"][key]["details"]["err"] = \
-                IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, command_id, ".err"))
+            try:  # because files might not be created yet
+                cmd_detached_response["commands"][key]["details"]["out"] = \
+                    IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".out"))
+                cmd_detached_response["commands"][key]["details"]["err"] = \
+                    IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".err"))
+            except Exception as e:
+                app.logger.debug("Exception({})".format(e.__str__()))
         cmd_detached_response["processes"] = [p.info for p in
                                               psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
