@@ -442,6 +442,31 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), str)
 
+    def test_get_command_stream_info(self):
+        test_id = "103_stream"
+        command = "echo 1 && sleep 1 && echo 2 && sleep 1 && echo 3 && sleep 1"
+        headers = {'Content-type': 'text/plain'}
+
+        response = requests.post(
+            self.server + f"/commanddetached/{test_id}",
+            data=f"{command}", headers=headers)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description'), test_id)
+
+        time.sleep(1)
+        response = requests.get(self.server + "/commanddetached")
+        body = response.json()
+        out_begin = body.get('description').get("commands").get(command).get("details").get('out')
+
+        time.sleep(2)
+        response = requests.get(self.server + "/commanddetached")
+        body = response.json()
+        out_end = body.get('description').get("commands").get(command).get("details").get('out')
+        self.assertGreater(out_end, out_begin)
+        self.assertIn(out_begin, out_end)  # streaming success
+
     def test_get_commandyaml_info(self):
         test_id = "yaml"
         with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:

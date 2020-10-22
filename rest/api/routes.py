@@ -300,9 +300,10 @@ def cmd_detached_start(command_id):
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
         command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
-        command.insert(0, command_id)  # first arg is test id
+        command.insert(0, command_id)  # first arg is command id
         command.insert(0, start_py_path)
         # command.insert(0, "python")
+        command_detached_stop_by_id(command_id=command_id)
         cmd_utils.run_cmd_detached(command)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
