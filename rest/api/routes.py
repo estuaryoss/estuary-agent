@@ -296,7 +296,6 @@ def cmd_detached_start(command_id):
     try:
         input_data_list = input_data.split("\n")
         command_detached_init["id"] = command_id
-        StateHolder.set_last_command(command_id)
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
         command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
@@ -305,6 +304,7 @@ def cmd_detached_start(command_id):
         # command.insert(0, "python")
         command_detached_stop_by_id(command_id=command_id)
         cmd_utils.run_cmd_detached(command)
+        StateHolder.set_last_command(command_id)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
@@ -351,7 +351,7 @@ def command_detached_stop_by_id(command_id):
 
     try:
         cmd_detached_response = json.loads(io_utils.read_file(file))
-        process_utils.kill_proc_tree(pid=cmd_detached_response.get('pid'), include_parent=True)
+        process_utils.kill_proc_tree(pid=cmd_detached_response.get('pid'))
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_STOP_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(
@@ -426,6 +426,7 @@ def command_detached_start_yaml(command_id):
         response = rest_service.post(data=cmds_list_as_string, headers=request.headers)
         if response.status_code != 200:
             raise Exception(response.json().get("description"))
+        StateHolder.set_last_command(command_id)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
                                                  message=ErrorCodes.HTTP_CODE.get(

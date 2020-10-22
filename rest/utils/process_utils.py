@@ -32,14 +32,15 @@ class ProcessUtils:
                 ls.append(p)
         return ls
 
-    def kill_proc_tree(self, pid=os.getpid(), sig=signal.SIGTERM, include_parent=False, timeout=5):
+    def kill_proc_tree(self, pid=os.getpid(), sig=signal.SIGTERM, include_parent=True, timeout=5):
 
         """Kill a process tree (including grandchildren) with signal
         "sig" and return a (gone, still_alive) tuple.
         "on_terminate", if specified, is a callback function which is
         called as soon as a child terminates.
         """
-
+        if pid == os.getpid():
+            include_parent = False
         parent = psutil.Process(pid=pid)
         children = parent.children(recursive=True)
         if include_parent:
