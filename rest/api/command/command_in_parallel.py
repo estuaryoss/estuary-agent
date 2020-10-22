@@ -1,4 +1,6 @@
 import datetime
+import platform
+import shlex
 from multiprocessing import Process, Manager
 
 from rest.api.definitions import command_detached_init
@@ -21,7 +23,10 @@ class CommandInParallel:
         start = datetime.datetime.now()
         dictionary['commands'][command]['startedat'] = str(start)
 
-        details = self.__cmd_utils.run_cmd_shell_false([rf"{command}"])
+        if platform.system() == "Windows":
+            details = self.__cmd_utils.run_cmd_shell_true(shlex.split(command))
+        else:
+            details = self.__cmd_utils.run_cmd_shell_true([command])
 
         dictionary['commands'][command]['status'] = status_finished
         end = datetime.datetime.now()

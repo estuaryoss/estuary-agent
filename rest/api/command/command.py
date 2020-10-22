@@ -1,5 +1,6 @@
 import datetime
 import os
+import platform
 
 from rest.api.definitions import command_detached_init
 from rest.utils.cmd_utils import CmdUtils
@@ -25,7 +26,7 @@ class Command:
         self.command_dict["startedat"] = str(datetime.datetime.now())
         self.__io_utils.write_to_file_dict(json_file, self.command_dict)
 
-        self.__run_commands(commands=commands, json_file=json_file, cmd_id=cmd_id)
+        self.__run_commands(json_file=json_file, cmd_id=cmd_id, commands=commands)
 
         self.command_dict['finished'] = True
         self.command_dict['started'] = False
@@ -36,7 +37,7 @@ class Command:
 
         return self.command_dict
 
-    def __run_commands(self, commands, json_file, cmd_id):
+    def __run_commands(self, json_file, cmd_id, commands):
         details = {}
         status_finished = "finished"
         status_in_progress = "in progress"
@@ -47,7 +48,10 @@ class Command:
             self.command_dict['commands'][command]['startedat'] = str(start)
             self.__io_utils.write_to_file_dict(json_file, self.command_dict)
 
-            details[command] = self.__cmd_utils.run_cmd_shell_false_to_file(command=[rf"{command}"], cmd_id=cmd_id)
+            if platform.system() == "Windows":
+                details[command] = self.__cmd_utils.run_cmd_shell_true_to_file_str(str_cmd=command, cmd_id=cmd_id)
+            else:
+                details[command] = self.__cmd_utils.run_cmd_shell_true_to_file_list(list_cmd=[command], cmd_id=cmd_id)
 
             self.command_dict['commands'][command]['status'] = status_finished
             end = datetime.datetime.now()

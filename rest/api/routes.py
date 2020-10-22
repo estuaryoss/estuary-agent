@@ -273,11 +273,11 @@ def get_cmd_detached_info_id(command_id):
 @app.route('/commanddetached/<command_id>', methods=['POST', 'PUT'])
 def cmd_detached_start(command_id):
     command_id = command_id.strip()
-    start_py_path = str(Path(".").absolute()) + "/start.py"
     command = []
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
     http = HttpResponse()
+    start_py_path = str(Path(".").absolute()) + "/start.py"
     input_data = request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
@@ -290,14 +290,13 @@ def cmd_detached_start(command_id):
     try:
         input_data_list = input_data.split("\n")
         command_detached_init["id"] = command_id
-        file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
         StateHolder.set_last_command(command_id)
-        io_utils.write_to_file_dict(file_path, command_detached_init)
+        io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
         command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
         command.insert(0, command_id)  # first arg is test id
         command.insert(0, start_py_path)
-        command.insert(0, "python")
+        # command.insert(0, "python")
         cmd_utils.run_cmd_detached(command)
     except Exception as e:
         return Response(json.dumps(http.response(code=ApiCodeConstants.COMMAND_DETACHED_START_FAILURE,
