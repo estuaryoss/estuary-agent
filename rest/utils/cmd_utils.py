@@ -19,9 +19,9 @@ class CmdUtils:
         return CmdUtils.__get_subprocess_data(p)
 
     @staticmethod
-    def run_cmd_shell_false_to_file(command):
-        file_path_out, file_path_err = CommandHasher.get_cmd_for_file_encode_list(command, ".out"), \
-                                       CommandHasher.get_cmd_for_file_encode_list(command, ".err")
+    def run_cmd_shell_false_to_file(command, cmd_id):
+        file_path_out, file_path_err = CommandHasher.get_cmd_for_file_encode_list(command, cmd_id, ".out"), \
+                                       CommandHasher.get_cmd_for_file_encode_list(command, cmd_id, ".err")
 
         IOUtils.delete_files([file_path_out, file_path_err])
         IOUtils.create_files([file_path_out, file_path_err])
