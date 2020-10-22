@@ -380,7 +380,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_gettestinfo_p(self, payload):
         test_id = "103"
         data_payload = f" ping -n {payload} 127.0.0.1 \n invalid_command"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
@@ -440,6 +440,31 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), list)
+
+    def test_get_command_stream_info(self):
+        test_id = "103_stream"
+        command = "echo 1 && ping -n 2 127.0.0.1 && echo 2 && ping -n 2 127.0.0.1 && echo 3 && ping -n 2 127.0.0.1"
+        headers = {'Content-type': 'text/plain'}
+
+        response = requests.post(
+            self.server + f"/commanddetached/{test_id}",
+            data=f"{command}", headers=headers)
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description'), test_id)
+
+        time.sleep(1)
+        response = requests.get(self.server + "/commanddetached")
+        body = response.json()
+        out_begin = body.get('description').get("commands").get(command).get("details").get('out')
+
+        time.sleep(2)
+        response = requests.get(self.server + "/commanddetached")
+        body = response.json()
+        out_end = body.get('description').get("commands").get(command).get("details").get('out')
+        self.assertGreater(out_end, out_begin)
+        self.assertIn(out_begin, out_end)  # streaming success
 
     def test_get_commandyaml_info(self):
         test_id = "yaml"
@@ -506,7 +531,7 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_command_stop_p(self):
         test_id = "100"
         data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"
-        commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
+        commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
         response = requests.delete(self.server + "/commanddetached")
@@ -532,7 +557,7 @@ class FlaskServerTestCase(unittest.TestCase):
         response = requests.delete(self.server + "/commanddetached")
         self.assertEqual(response.status_code, 200)
         body = response.json()
-        self.assertEqual(body.get('description'),  ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
+        self.assertEqual(body.get('description'), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
 
         response = requests.get(self.server + "/commanddetached")
         self.assertEqual(response.status_code, 200)

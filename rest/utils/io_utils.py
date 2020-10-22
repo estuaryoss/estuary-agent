@@ -62,6 +62,20 @@ class IOUtils:
         return filtered_list
 
     @staticmethod
+    def delete_file(file):
+        file_path = Path(file)
+        if file_path.is_file():
+            try:
+                file_path.unlink()
+            except Exception as e:
+                print(f"Failed to delete file {file}: {e.__str__()}")
+
+    @staticmethod
+    def delete_files(files):
+        for file in files:
+            IOUtils.delete_file(file)
+
+    @staticmethod
     def read_file(file):
         file_path = Path(file)
         if not file_path.is_file():
@@ -83,3 +97,8 @@ class IOUtils:
         if not file_path.exists():
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
         shutil.make_archive(f"/tmp/{name}", 'zip', f"{path}")
+
+    @staticmethod
+    def create_files(files):
+        for file in files:
+            IOUtils.create_file(file)

@@ -30,4 +30,5 @@ class EnvInit:
                               f"{EnvConstants.TEMPLATES_DIR} env var not set, defaulting to : " + env.get_env_and_virtual_env().get(
                                   EnvConstants.TEMPLATES_DIR)})
     CMD_DETACHED_DIR = "cmds"
+    CMD_DETACHED_STREAMS = "streams"
     COMMAND_DETACHED_FILENAME = CMD_DETACHED_DIR + "/cmd_info_{}.json"

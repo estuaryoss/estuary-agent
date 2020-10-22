@@ -32,6 +32,7 @@ if __name__ == "__main__":
     io_utils.create_dir(Path(EnvInit.TEMPLATES_DIR))
     io_utils.create_dir(Path(EnvInit.VARS_DIR))
     io_utils.create_dir(Path(EnvInit.CMD_DETACHED_DIR))
+    io_utils.create_dir(Path(EnvInit.CMD_DETACHED_STREAMS))
 
     environ_dump = message_dumper.dump_message(EnvironmentSingleton.get_instance().get_env_and_virtual_env())
     ip_port_dump = message_dumper.dump_message({"host": host, "port": port})
