@@ -18,8 +18,8 @@ from tests.rest.utils import Utils
 
 
 class FlaskServerTestCase(unittest.TestCase):
-    script_path = "tests/rest/input"
-    # script_path = "input"
+    # script_path = "tests/rest/input"
+    script_path = "input"
     server = "http://127.0.0.1:8080"
 
     def setUp(self):
@@ -106,7 +106,7 @@ class FlaskServerTestCase(unittest.TestCase):
         body = response.json()
         headers = response.headers
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(body.get('description'), service_name)
+        self.assertIsInstance(body.get('description'), dict)
         self.assertEqual(body.get('name'), service_name)
         self.assertEqual(body.get("message"), ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS))
         self.assertEqual(body.get('version'), properties.get('version'))
