@@ -18,8 +18,8 @@ from tests.rest.utils import Utils
 
 
 class FlaskServerTestCase(unittest.TestCase):
-    # script_path = "tests/rest/input"
-    script_path = "input"
+    script_path = "tests/rest/input"
+    # script_path = "input"
     server = "http://127.0.0.1:8080"
 
     def setUp(self):
