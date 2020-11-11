@@ -102,3 +102,7 @@ class IOUtils:
     def create_files(files):
         for file in files:
             IOUtils.create_file(file)
+
+    @classmethod
+    def does_file_exist(cls, path):
+        return Path(path).exists()

@@ -10,7 +10,7 @@ from flask import Response
 from flask import request
 from fluent import sender
 
-from about import properties
+from about import properties, about_system
 from rest.api import AppCreatorSingleton
 from rest.api.command.command_hasher import CommandHasher
 from rest.api.command.command_in_memory import CommandInMemory
@@ -128,9 +128,8 @@ def about():
 
     return Response(json.dumps(
         http.response(code=ApiCodeConstants.SUCCESS, message=ErrorCodes.HTTP_CODE.get(ApiCodeConstants.SUCCESS),
-                      description=properties["name"])),
-        200,
-        mimetype="application/json")
+                      description=about_system)),
+        200, mimetype="application/json")
 
 
 @app.route('/render/<template>/<variables>', methods=['GET', 'POST'])
@@ -303,10 +302,11 @@ def cmd_detached_start(command_id):
         command_detached_init["id"] = command_id
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
-        command.insert(0, ";".join(input_data_list))  # second arg is cmd list separated by ;
+        command.insert(0, ";;".join(input_data_list))  # commands as args separated by ;;
+        command.insert(0, "--args")
         command.insert(0, command_id)  # first arg is command id
+        command.insert(0, "--cid")
         command.insert(0, start_py_path)
-        # command.insert(0, "python")
         command_detached_stop_by_id(command_id=command_id)
         cmd_utils.run_cmd_detached(command)
         StateHolder.set_last_command(command_id)
