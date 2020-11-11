@@ -11,6 +11,7 @@ from rest.api.constants.env_init import EnvInit
 from rest.api.definitions import command_detached_init
 from rest.utils.io_utils import IOUtils
 
+
 @click.command()
 @click.option('--cid', help="The id of the command. E.g. 5")
 @click.option('--args', help="The arguments of the command separated by ';;'. E.g. ls -lrt;;echo3")
@@ -40,8 +41,6 @@ def cli(cid, args):
 
     command_runner = Command()
     dictionary = command_runner.run_commands(file_path, command_id, commands_list)
-    dictionary = io_utils.read_dict_from_file(file_path)
-
     print(json.dumps(dictionary) + "\n")
 
 
