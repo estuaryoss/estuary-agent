@@ -17,7 +17,7 @@ from rest.utils.io_utils import IOUtils
 @click.option('--args', help="The arguments of the command separated by ';;'. E.g. ls -lrt;;echo3")
 def cli(cid, args):
     if cid is None:
-        raise Exception(f"Error: --id argument was not set. Value: {str(cid)}")
+        raise Exception(f"Error: --cid argument was not set. Value: {str(cid)}")
 
     if args is None:
         raise Exception(f"Error: --args argument was not set. Value: {str(args)}")
