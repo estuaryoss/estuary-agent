@@ -302,10 +302,8 @@ def cmd_detached_start(command_id):
         command_detached_init["id"] = command_id
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
-        command.insert(0, ";;".join(input_data_list))  # commands as args separated by ;;
-        command.insert(0, "--args")
-        command.insert(0, command_id)  # first arg is command id
-        command.insert(0, "--cid")
+        command.insert(0, "--args=" + ";;".join(input_data_list))  # commands as args separated by ;;
+        command.insert(0, "--cid=" + command_id)  # first arg is command id
         command.insert(0, start_py_path)
         command_detached_stop_by_id(command_id=command_id)
         cmd_utils.run_cmd_detached(command)

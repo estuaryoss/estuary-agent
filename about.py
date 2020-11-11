@@ -15,14 +15,14 @@ properties = {
 
 about_system = {
     "system": platform.system(),
-    "layer": "Docker" if IOUtils.does_file_exist("/.dockerenv") else "Virtual Machine",
-    "hostname": platform.uname().node,
     "platform": platform.platform(),
     "release": platform.release(),
+    "version": platform.version(),
     "architecture": platform.architecture()[0],
     "machine": platform.machine(),
+    "layer": "Docker" if IOUtils.does_file_exist("/.dockerenv") else "Virtual Machine",
+    "hostname": platform.uname().node,
     "cpu": platform.processor(),
     "ram": str(round(psutil.virtual_memory().total / (1024.0 ** 3))) + " GB",
-    "version": platform.version(),
     "python": platform.python_version()
 }
