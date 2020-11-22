@@ -6,7 +6,7 @@ from rest.utils.io_utils import IOUtils
 
 properties = {
     "name": "estuary-agent",
-    "version": "4.3.0",
+    "version": "4.4.0",
     "description": "Run your shell commands via REST API",
     "author": "Catalin Dinuta",
     "platforms": ["Linux", "Raspbian", "Mac", "Windows"],
