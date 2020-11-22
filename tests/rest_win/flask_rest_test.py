@@ -735,9 +735,9 @@ class FlaskServerTestCase(unittest.TestCase):
         body = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
-                         ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_YAML_CONFIG))
+                         ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_YAML_CONFIG.value))
         self.assertEqual(body.get('version'), properties.get('version'))
-        self.assertEqual(body.get('code'), ApiCode.INVALID_YAML_CONFIG)
+        self.assertEqual(body.get('code'), ApiCode.INVALID_YAML_CONFIG.value)
         self.assertIn("Exception", body.get('description'))
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -782,9 +782,9 @@ class FlaskServerTestCase(unittest.TestCase):
         body = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertEqual(body.get("message"),
-                         ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_YAML_CONFIG))
+                         ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_YAML_CONFIG.value))
         self.assertEqual(body.get('version'), properties.get('version'))
-        self.assertEqual(body.get('code'), ApiCode.INVALID_YAML_CONFIG)
+        self.assertEqual(body.get('code'), ApiCode.INVALID_YAML_CONFIG.value)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
