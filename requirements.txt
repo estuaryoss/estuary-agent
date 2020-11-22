@@ -1,4 +1,4 @@
-flask
+flask==1.1.2
 flask_api
 PyYAML
 requests
@@ -7,7 +7,7 @@ python-coveralls
 pytest-cov
 flask_swagger_ui
 requests_toolbelt
-py_eureka_client==0.8.6
+py_eureka_client==0.8.7
 flask_cors
 fluent-logger
 Jinja2
