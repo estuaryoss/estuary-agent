@@ -742,7 +742,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertNotEqual(body.get('description').get('commands').get(command).get('details').get('out'), "")
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -915,7 +915,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIn("main", body.get('description').get('commands').get(command).get('details').get('out'))
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -936,7 +936,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "1\n2\n")
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -958,12 +958,12 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(commands[0]).get('details').get('out'), "")
         self.assertEqual(body.get('description').get('commands').get(commands[0]).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(commands[0]).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('details').get('args'), str)
         self.assertEqual(body.get('description').get('commands').get(commands[1]).get('details').get('code'), 0)
         self.assertIn("main", body.get('description').get('commands').get(commands[1]).get('details').get('out'))
         self.assertEqual(body.get('description').get('commands').get(commands[1]).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(commands[1]).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
