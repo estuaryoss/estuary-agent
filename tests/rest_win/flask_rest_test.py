@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import platform
-import shlex
 import time
 import unittest
 import zipfile
@@ -68,8 +67,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
-        ("FOO1", "BAR10"),
-        ("FOO2", "BAR20")
+        ("FOO1", "BAR10")
     ])
     def test_env_load_from_props(self, env_var, expected_value):
         response = requests.get(self.server + "/env/" + env_var)
@@ -806,7 +804,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertNotIn("is not recognized",
                          body.get('description').get('commands').get(command).get('details').get('err'))
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -828,7 +826,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIn("main", body.get('description').get('commands').get(command).get('details').get('out'))
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -849,7 +847,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "1 \r\n2\r\n")
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(command).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(command).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -871,12 +869,12 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('commands').get(commands[0]).get('details').get('out'), "")
         self.assertEqual(body.get('description').get('commands').get(commands[0]).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(commands[0]).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('details').get('args'), str)
         self.assertEqual(body.get('description').get('commands').get(commands[1]).get('details').get('code'), 0)
         self.assertIn("main", body.get('description').get('commands').get(commands[1]).get('details').get('out'))
         self.assertEqual(body.get('description').get('commands').get(commands[1]).get('details').get('err'), "")
         self.assertGreater(body.get('description').get('commands').get(commands[1]).get('details').get('pid'), 0)
-        self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('details').get('args'), list)
+        self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -920,7 +918,6 @@ class FlaskServerTestCase(unittest.TestCase):
 
     def test_executecommand_arg_with_spaces(self):
         raw_cmd = "java -cp whatever.jar com.java.org -cmd my_cmd -args \"a;b c d;e\""
-        shlex_cmd = shlex.split(raw_cmd)
 
         response = requests.post(self.server + f"/command", data=raw_cmd)
         body = response.json()
@@ -930,10 +927,8 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
-        self.assertEqual(len(body.get('description').get('commands').get(raw_cmd).get('details').get('args')),
-                         len(shlex_cmd))
-        self.assertEqual(body.get('description').get('commands').get(raw_cmd).get('details').get('args')[-1],
-                         shlex_cmd[-1])
+        self.assertGreater(len(body.get('description').get('commands').get(raw_cmd).get('details').get('args')), 0)
+        self.assertIsInstance(body.get('description').get('commands').get(raw_cmd).get('details').get('args'), str)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 

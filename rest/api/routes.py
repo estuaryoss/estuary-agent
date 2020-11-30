@@ -462,7 +462,7 @@ def get_results_folder():
 @app.route('/command', methods=['POST', 'PUT'])
 def execute_command():
     http = HttpResponse()
-    input_data = request.data.decode("UTF-8", "replace").strip()
+    input_data = request.get_data(as_text=True).strip()
 
     if not input_data:
         raise ApiException(ApiCode.EMPTY_REQUEST_BODY_PROVIDED.value,

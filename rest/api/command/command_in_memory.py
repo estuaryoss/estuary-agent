@@ -45,7 +45,7 @@ class CommandInMemory:
             self.command_dict['commands'][command]['startedat'] = str(start_time)
 
             if platform.system() == "Windows":
-                details[command] = self.__cmd_utils.run_cmd_shell_true(shlex.split(command))
+                details[command] = self.__cmd_utils.run_cmd_shell_true(command)
             else:
                 details[command] = self.__cmd_utils.run_cmd_shell_true([command])
 

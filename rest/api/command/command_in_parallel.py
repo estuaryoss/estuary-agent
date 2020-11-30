@@ -24,7 +24,7 @@ class CommandInParallel:
         dictionary['commands'][command]['startedat'] = str(start)
 
         if platform.system() == "Windows":
-            details = self.__cmd_utils.run_cmd_shell_true(shlex.split(command))
+            details = self.__cmd_utils.run_cmd_shell_true(command)
         else:
             details = self.__cmd_utils.run_cmd_shell_true([command])
 
