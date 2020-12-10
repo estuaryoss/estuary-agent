@@ -1,5 +1,5 @@
 class YamlCommandsSplitter:
-    __in_order_fields = ["before_script", "script", "after_script"]
+    __in_order_fields = ["before_install", "install", "after_install", "before_script", "script", "after_script"]
     __mandatory_fields = ["script"]
 
     def __init__(self, config):
