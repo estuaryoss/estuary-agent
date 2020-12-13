@@ -910,7 +910,7 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
-        self.assertEqual(round(int(body.get('description').get('duration'))), b)
+        self.assertEqual(round(int(body.get('description').get('duration'))), b - 1)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
         self.assertIsNotNone(body.get('timestamp'))
