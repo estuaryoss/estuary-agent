@@ -31,14 +31,14 @@ class IOUtils:
             return last_line
 
     @staticmethod
-    def append_to_file(file, content=""):
+    def append_to_file(file, content):
         with open(file, 'a') as f:
-            f.write(content + "\n")
+            f.write(content + "\n") if content else None
 
     @staticmethod
-    def write_to_file_binary(file, content=""):
+    def write_to_file_binary(file, content):
         with open(file, 'wb') as f:
-            f.write(content)
+            f.write(content) if content else None
 
     @staticmethod
     def write_to_file_dict(file, content):

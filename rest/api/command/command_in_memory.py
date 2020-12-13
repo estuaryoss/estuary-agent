@@ -1,13 +1,16 @@
 import datetime
 import os
 import platform
-import shlex
 
 from rest.api.definitions import command_detached_init
 from rest.utils.cmd_utils import CmdUtils
 
 
 class CommandInMemory:
+    """
+    This class executes commands, stores & gets the details from the memory
+    It uses a dict as data describing the command details
+    """
 
     def __init__(self):
         self.command_dict = command_detached_init
@@ -20,13 +23,14 @@ class CommandInMemory:
         self.command_dict['pid'] = os.getpid()
         input_data_dict = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
         self.command_dict["started"] = True
+        self.command_dict["finished"] = False
         self.command_dict["commands"] = input_data_dict
         self.command_dict["startedat"] = str(datetime.datetime.now())
 
         self.__run_commands(commands)
 
-        self.command_dict['finished'] = True
         self.command_dict['started'] = False
+        self.command_dict['finished'] = True
         end_time = datetime.datetime.now()
         self.command_dict['finishedat'] = str(end_time)
         self.command_dict['duration'] = (end_time - start_time).total_seconds()

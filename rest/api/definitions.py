@@ -13,12 +13,12 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 
 command_detached_init = {
-    "finished": False,
     "started": False,
+    "finished": False,
+    "id": "none",
+    "pid": 0,
     "startedat": str(datetime.datetime.now()),
     "finishedat": str(datetime.datetime.now()),
     "duration": 0.000000,
-    "id": "none",
-    "pid": 0,
     "commands": {}
 }
