@@ -389,7 +389,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(body.get('description'), test_id)
 
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -452,7 +452,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(body.get('description'), test_id)
 
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         out_begin = body.get('description').get("commands").get(command).get("details").get('out')
@@ -480,7 +480,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('description'), test_id)
         self.assertEqual(body.get('description').get('config'), payload)
 
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -910,7 +910,7 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
-        self.assertEqual(round(int(body.get('description').get('duration'))), b - 1)
+        self.assertEqual(round(int(body.get('description').get('duration'))), b)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[0]).get('duration'))), a - 1)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b - 1)
         self.assertIsNotNone(body.get('timestamp'))
