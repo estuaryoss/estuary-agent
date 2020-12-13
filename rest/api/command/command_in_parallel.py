@@ -1,6 +1,5 @@
 import datetime
 import platform
-import shlex
 from multiprocessing import Process, Manager
 
 from rest.api.definitions import command_detached_init
@@ -9,6 +8,10 @@ from rest.utils.io_utils import IOUtils
 
 
 class CommandInParallel:
+    """
+    This class does not implement (and it does not make sense) executing commands in the same shell
+    Every command is in different shell
+    """
 
     def __init__(self):
         self.command_dict = command_detached_init
@@ -35,7 +38,9 @@ class CommandInParallel:
         dictionary['commands'][command]['details'] = details
 
         manager_dict[command] = {}
-        manager_dict[command] = dictionary['commands'][command.strip()]
+        manager_dict[command] = dictionary['commands'][command]
+        manager_dict['last'] = dictionary['commands'][command]
+        manager_dict['last'] = manager_dict.pop('last')
 
     def run_commands(self, commands):
         with Manager() as manager:

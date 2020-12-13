@@ -1,3 +1,5 @@
+from distutils.util import strtobool
+
 from rest.api.constants.env_constants import EnvConstants
 from rest.environment.environment import EnvironmentSingleton
 
@@ -42,5 +44,8 @@ class EnvStartupSingleton:
                 EnvConstants.HTTPS_CERT) else "https/cert.pem",
             EnvConstants.HTTPS_KEY: self.__env.get_env().get(
                 EnvConstants.HTTPS_KEY).strip() if self.__env.get_env().get(
-                EnvConstants.HTTPS_KEY) else "https/key.pem"
+                EnvConstants.HTTPS_KEY) else "https/key.pem",
+            EnvConstants.KEEP_SHELL: bool(strtobool(self.__env.get_env().get(
+                EnvConstants.KEEP_SHELL).strip())) if self.__env.get_env().get(
+                EnvConstants.KEEP_SHELL) else False
         }

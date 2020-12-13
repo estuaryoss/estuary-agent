@@ -12,3 +12,4 @@ class EnvConstants:
     HTTPS_ENABLE = "HTTPS_ENABLE"
     HTTPS_CERT = "HTTPS_CERT"
     HTTPS_KEY = "HTTPS_KEY"
+    KEEP_SHELL = "KEEP_SHELL"
