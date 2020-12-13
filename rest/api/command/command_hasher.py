@@ -1,4 +1,5 @@
 import base64
+import os
 
 from rest.api.constants.env_init import EnvInit
 
