@@ -1,7 +1,7 @@
 FROM alpine:3.11.6
 
 RUN apk add --no-cache python3 && \
-    pip3 install --upgrade pip==20.2.4 setuptools==46.2.0 --no-cache
+    pip3 install --upgrade pip==20.3.1 setuptools==46.2.0 --no-cache
 
 RUN apk add --no-cache \
     bash \

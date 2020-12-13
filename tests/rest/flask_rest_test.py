@@ -493,7 +493,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertNotEqual(body.get('description').get('finishedat'), "none")
         self.assertEqual(round(int(body.get('description').get('duration'))), 0)
         self.assertIsInstance(body.get('description').get('duration'), float)
-        self.assertEqual(len(body.get('description').get("commands")), 3)
+        self.assertEqual(len(body.get('description').get("commands")), 3 + 1)
+        self.assertIsInstance(body.get('description').get("commands").get('last'), dict)
 
     @parameterized.expand([
         "3"
@@ -533,7 +534,7 @@ class FlaskServerTestCase(unittest.TestCase):
         time.sleep(1)
         response = requests.get(self.server + f"/commanddetached")
         body = response.json()
-        self.assertEqual(len(body.get('description').get("commands")), len(commands))
+        self.assertEqual(len(body.get('description').get("commands")), len(commands) + 1)
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "finished")
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("details").get("err"), "")
         self.assertEqual(body.get('description').get("commands").get(commands[2]).get("status"), "finished")
@@ -722,6 +723,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIn("not found",
                       body.get('description').get('commands').get(command).get('details').get('err'))
         self.assertEqual(body.get('description').get('commands').get(command).get('details').get('out'), "")
+        self.assertEqual(body.get('description').get('commands').get(command),
+                         body.get('description').get('commands').get('last'))
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
@@ -760,7 +763,7 @@ class FlaskServerTestCase(unittest.TestCase):
                          ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
-        self.assertEqual(len(body.get('description').get('description').get('commands')), 3)
+        self.assertEqual(len(body.get('description').get('description').get('commands')), 3 + 1)  # last one is 'last'
         self.assertEqual(body.get('description').get('config'), yaml.safe_load(payload))
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
@@ -893,6 +896,8 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsInstance(body.get('description').get('commands').get(commands[0]).get('duration'), float)
         self.assertEqual(round(int(body.get('description').get('commands').get(commands[1]).get('duration'))), b)
         self.assertIsInstance(body.get('description').get('commands').get(commands[1]).get('duration'), float)
+        self.assertEqual(body.get('description').get('commands').get(commands[1]),
+                         body.get('description').get('commands').get('last'))
         self.assertEqual(round(int(body.get('description').get('duration'))), a + b)
         self.assertIsInstance(body.get('description').get('duration'), float)
         self.assertIsNotNone(body.get('timestamp'))

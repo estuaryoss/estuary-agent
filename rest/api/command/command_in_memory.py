@@ -37,7 +37,7 @@ class CommandInMemory:
         return self.command_dict
 
     def __run_commands(self, commands):
-        if EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.KEEP_SHELL):
+        if EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PRESERVE_SHELL):
             self.__run_cmds_each_in_same_shell(commands)
         else:
             self.__run_cmds_each_in_different_shell(commands)

@@ -45,7 +45,7 @@ class EnvStartupSingleton:
             EnvConstants.HTTPS_KEY: self.__env.get_env().get(
                 EnvConstants.HTTPS_KEY).strip() if self.__env.get_env().get(
                 EnvConstants.HTTPS_KEY) else "https/key.pem",
-            EnvConstants.KEEP_SHELL: bool(strtobool(self.__env.get_env().get(
-                EnvConstants.KEEP_SHELL).strip())) if self.__env.get_env().get(
-                EnvConstants.KEEP_SHELL) else False
+            EnvConstants.PRESERVE_SHELL: bool(strtobool(self.__env.get_env().get(
+                EnvConstants.PRESERVE_SHELL).strip())) if self.__env.get_env().get(
+                EnvConstants.PRESERVE_SHELL) else False
         }

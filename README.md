@@ -117,6 +117,38 @@ Set **HTTPS_ENABLE** env var option to *true* or *false*.
 Set the certificate and the private key path with **HTTPS_CERT** and **HTTPS_KEY** env variables. 
 If you do not set cert and private key file env vars, it defaults to a folder in the same path called *https*, and the default files *https/cert.pem* and *https/key.pem*. 
 
+### Preserving SHELL
+Set **PRESERVE_SHELL** env var option to *true* or *false*. If not set the service will not preserve shell, thus running each command under
+different shell.
+
+Consider the following code:  
+```bash
+A=1
+echo $A
+```
+
+PRESERVE_SHELL=true
+```bash
+root# A=1
+root# echo $A
+1
+root#
+```
+
+PRESERVE_SHELL=false
+```bash
+root# A=1
+root# echo $A
+
+root#
+```
+
+If you still want to execute using PRESERVE_SHELL=false, you will have to call:  
+```bash
+A=1&&echo $A
+```
+
+
 ## Environment variables injection
 User defined environment variables will be stored in a 'virtual' environment. The extra env vars will be used by the process that executes system commands.  
 There are two ways to inject user defined environment variables.    

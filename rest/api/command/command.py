@@ -23,7 +23,6 @@ class Command:
         self.command_dict['pid'] = os.getpid()
         self.command_dict["started"] = True
         self.command_dict["startedat"] = str(datetime.datetime.now())
-        self.__io_utils.write_to_file_dict(json_file, self.command_dict)
 
         self.__run_commands(json_file=json_file, cmd_id=cmd_id, commands=commands)
 
@@ -37,7 +36,7 @@ class Command:
         return self.command_dict
 
     def __run_commands(self, json_file, cmd_id, commands):
-        if EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.KEEP_SHELL):
+        if EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PRESERVE_SHELL):
             self.__run_cmds_each_in_same_shell(json_file, cmd_id, commands)
         else:
             self.__run_cmds_each_in_different_shell(json_file, cmd_id, commands)
@@ -46,6 +45,7 @@ class Command:
         commands = [item.strip() for item in commands]
         input_data_dict = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
         self.command_dict["commands"] = input_data_dict
+        self.__io_utils.write_to_file_dict(json_file, self.command_dict)
         details = {}
         status_finished = "finished"
         status_in_progress = "in progress"
