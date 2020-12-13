@@ -46,6 +46,7 @@ class Command:
         input_data_dict = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
         self.command_dict["commands"] = input_data_dict
         self.__io_utils.write_to_file_dict(json_file, self.command_dict)
+
         details = {}
         status_finished = "finished"
         status_in_progress = "in progress"
@@ -53,9 +54,9 @@ class Command:
         for command in commands:
             start_time = datetime.datetime.now()
             self.command_dict['commands'][command] = {"status": "scheduled", "details": {}}
-            self.command_dict['commands']['last'] = {"status": "scheduled", "details": {}}
             self.command_dict['commands'][command]['status'] = status_in_progress
             self.command_dict['commands'][command]['startedat'] = str(start_time)
+            self.command_dict['commands']['last'] = self.command_dict['commands'][command]
             self.__io_utils.write_to_file_dict(json_file, self.command_dict)
 
             if platform.system() == "Windows":

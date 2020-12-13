@@ -209,8 +209,8 @@ def get_cmd_detached_info():
                     IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".err"))
             except Exception as e:
                 app.logger.debug("Exception({})".format(e.__str__()))
-        cmd_detached_response["processes"] = [p.info for p in
-                                              psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
+        cmd_detached_response["processes"] = \
+            [p.info for p in psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
     except Exception as e:
         raise ApiException(ApiCode.GET_COMMAND_DETACHED_INFO_FAILURE,
@@ -258,7 +258,7 @@ def cmd_detached_start(command_id):
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
     http = HttpResponse()
-    start_py_path = str(Path(".").absolute()) + "/start.py"
+    start_py_path = str(Path(".").absolute()) + os.path.sep + "start.py"
     input_data = request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
@@ -275,9 +275,10 @@ def cmd_detached_start(command_id):
         command_detached_init["id"] = command_id
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
-        command.insert(0, "--args=" + ";;".join(input_data_list))  # commands as args separated by ;;
-        command.insert(0, "--cid=" + command_id)  # first arg is command id
+        command.insert(0, f'--args={";;".join(input_data_list)}')  # commands as args separated by ;;
+        command.insert(0, f'--cid={command_id}')  # first arg is command id
         command.insert(0, start_py_path)
+        # command.insert(0, "python")
         cmd_utils.run_cmd_detached(command)
         StateHolder.set_last_command(command_id)
     except Exception as e:

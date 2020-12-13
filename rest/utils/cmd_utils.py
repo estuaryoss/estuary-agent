@@ -59,9 +59,9 @@ class CmdUtils:
         out, err = p.communicate()
 
         return {
+            "code": p.returncode,
             "out": out.decode("UTF-8", "replace"),
             "err": err.decode("UTF-8", "replace"),
-            "code": p.returncode,
             "pid": p.pid,
             "args": p.args
         }
@@ -71,9 +71,9 @@ class CmdUtils:
         p.communicate()
 
         return {
+            "code": p.returncode,
             "out": IOUtils.read_file(file_out),
             "err": IOUtils.read_file(file_err),
-            "code": p.returncode,
             "pid": p.pid,
             "args": p.args
         }

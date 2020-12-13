@@ -23,24 +23,23 @@ def cli(cid, args):
         raise Exception(f"Error: --args argument was not set. Value: {str(args)}")
 
     io_utils = IOUtils()
-    command_logger_path = "command_info_logger.txt"
+    io_utils.append_to_file("command_info_logger.txt", f"{sys.argv[0]} --id={cid} --args={args}")
 
-    io_utils.append_to_file(command_logger_path, f"{sys.argv[0]} --id {cid} --args {args}")
     IOUtils.create_dir(EnvInit.CMD_DETACHED_DIR)
     IOUtils.create_dir(EnvInit.CMD_DETACHED_STREAMS)
 
     command_id = cid
-    commands_list = args.split(";;")
-    file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
+    command_list = args.split(";;")
+    json_file_path = EnvInit.COMMAND_DETACHED_FILENAME.format(command_id)
 
     try:
         command_detached_init["pid"] = os.getpid()
-        io_utils.write_to_file_dict(Path(file_path), command_detached_init)
+        io_utils.write_to_file_dict(Path(json_file_path), command_detached_init)
     except Exception as e:
         raise e
 
     command_runner = Command()
-    dictionary = command_runner.run_commands(file_path, command_id, commands_list)
+    dictionary = command_runner.run_commands(json_file_path, command_id, command_list)
     print(json.dumps(dictionary) + "\n")
 
 
