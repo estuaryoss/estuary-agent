@@ -9,7 +9,7 @@ class CmdUtils:
 
     @staticmethod
     def run_cmd_detached(command):
-        p = subprocess.Popen(command, env=EnvironmentSingleton.get_instance().get_env_and_virtual_env(), shell=True)
+        p = subprocess.Popen(command, env=EnvironmentSingleton.get_instance().get_env_and_virtual_env())
         print("Opened pid {} for command {}".format(p.pid, command))
 
     @staticmethod

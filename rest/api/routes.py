@@ -254,7 +254,6 @@ def get_cmd_detached_info_id(command_id):
 @app.route('/commanddetached/<command_id>', methods=['POST'])
 def cmd_detached_start(command_id):
     command_id = command_id.strip()
-    command = []
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
     http = HttpResponse()
@@ -275,9 +274,7 @@ def cmd_detached_start(command_id):
         command_detached_init["id"] = command_id
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
-        command.insert(0, f'--args={";;".join(input_data_list)}')  # commands as args separated by ;;
-        command.insert(0, f'--cid={command_id}')  # first arg is command id
-        command.insert(0, start_py_path)
+        command = [start_py_path, f"--cid={command_id}", f"--args={';;'.join(input_data_list)}"]
         cmd_utils.run_cmd_detached(command)
         StateHolder.set_last_command(command_id)
     except Exception as e:

@@ -22,26 +22,26 @@ class CommandInParallel:
         start_time = datetime.datetime.now()
         self.command_dict['commands'][command]['startedat'] = str(start_time)
 
-        if platform.system() == "Windows":
-            self.command_dict['commands'][command]['details'] = await self.__cmd_utils.run_cmd_async(command)
-        else:
-            self.command_dict['commands'][command]['details'] = await self.__cmd_utils.run_cmd_async([command])
+        self.command_dict['commands'][command]['details'] = await self.__cmd_utils.run_cmd_async(command)
 
-        self.command_dict['commands'][command]['status'] = status_finished
         end_time = datetime.datetime.now()
+        self.command_dict['commands'][command]['status'] = status_finished
         self.command_dict['commands'][command]['finishedat'] = str(end_time)
         self.command_dict['commands'][command]['duration'] = (end_time - start_time).total_seconds()
 
         return command
 
     def run_commands(self, commands):
+        commands = [item.strip() for item in commands]
+        self.command_dict['commands'] = dict.fromkeys(commands, {"status": "scheduled", "details": {}})
+
         start_time = datetime.datetime.now()
 
         if platform.system() == "Windows":
             loop = asyncio.ProactorEventLoop()
             asyncio.set_event_loop(loop)
         else:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.new_event_loop()
 
         loop.run_until_complete(self.main_asyncio(commands))
         loop.close()
@@ -56,6 +56,6 @@ class CommandInParallel:
         return self.command_dict
 
     async def main_asyncio(self, commands):
-        cmds_list = [self.run_command(command) for command in commands]
-        for cmd in asyncio.as_completed(cmds_list):
-            print(await cmd)
+        future_commands = [self.run_command(command) for command in commands]
+        for finished_command in asyncio.as_completed(future_commands):
+            print(await finished_command)
