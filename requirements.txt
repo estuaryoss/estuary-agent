@@ -12,8 +12,9 @@ flask_cors
 fluent-logger
 Jinja2
 psutil
-pyinstaller
-setuptools==44.0.0
+pyinstaller==4.1
+setuptools==51.0.0
 jproperties
 click
-# pypiwin32 #for windows pyinstalller
+asyncio
+#pypiwin32==223

@@ -1,3 +1,5 @@
+from distutils.util import strtobool
+
 from rest.api.constants.env_constants import EnvConstants
 from rest.environment.environment import EnvironmentSingleton
 
@@ -34,7 +36,7 @@ class EnvStartupSingleton:
             EnvConstants.HTTP_AUTH_TOKEN: self.__env.get_env().get(
                 EnvConstants.HTTP_AUTH_TOKEN).strip() if self.__env.get_env().get(
                 EnvConstants.HTTP_AUTH_TOKEN) else "None",
-            EnvConstants.HTTPS_ENABLE: bool(self.__env.get_env().get(
+            EnvConstants.HTTPS_ENABLE: strtobool(self.__env.get_env().get(
                 EnvConstants.HTTPS_ENABLE).strip()) if self.__env.get_env().get(
                 EnvConstants.HTTPS_ENABLE) else False,
             EnvConstants.HTTPS_CERT: self.__env.get_env().get(

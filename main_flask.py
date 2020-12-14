@@ -13,9 +13,6 @@ from rest.utils.env_startup import EnvStartupSingleton
 from rest.utils.io_utils import IOUtils
 
 if __name__ == "__main__":
-    # fix for pyinstaller
-    multiprocessing.freeze_support()
-
     cli = sys.modules['flask.cli']
     cli.show_server_banner = lambda *x: None
 
@@ -45,7 +42,5 @@ if __name__ == "__main__":
     is_https = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_ENABLE)
     https_cert_path = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT)
     https_prv_key_path = EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_KEY)
-    ssl_context = None
-    if is_https:
-        ssl_context = (https_cert_path, https_prv_key_path)
+    ssl_context = (https_cert_path, https_prv_key_path) if is_https else None
     app.run(host=host, port=port, ssl_context=ssl_context)

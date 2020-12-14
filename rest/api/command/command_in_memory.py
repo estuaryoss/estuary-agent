@@ -38,23 +38,26 @@ class CommandInMemory:
         return self.command_dict
 
     def __run_commands(self, commands):
+        for command in commands:
+            self.run_command(command)
+
+    def run_command(self, command):
         details = {}
         status_finished = "finished"
         status_in_progress = "in progress"
+        start_time = datetime.datetime.now()
+        self.command_dict['commands'][command] = {"status": "scheduled", "details": {}}
+        self.command_dict['commands'][command]['status'] = status_in_progress
+        self.command_dict['commands'][command]['startedat'] = str(start_time)
+        if platform.system() == "Windows":
+            details[command] = self.__cmd_utils.run_cmd_shell_true(command)
+        else:
+            details[command] = self.__cmd_utils.run_cmd_shell_true([command])
+        self.command_dict['commands'][command]['status'] = status_finished
+        end_time = datetime.datetime.now()
+        self.command_dict['commands'][command]['finishedat'] = str(end_time)
+        self.command_dict['commands'][command]['duration'] = (end_time - start_time).total_seconds()
+        self.command_dict['commands'][command]['details'] = details[command]
 
-        for command in commands:
-            start_time = datetime.datetime.now()
-            self.command_dict['commands'][command] = {"status": "scheduled", "details": {}}
-            self.command_dict['commands'][command]['status'] = status_in_progress
-            self.command_dict['commands'][command]['startedat'] = str(start_time)
-
-            if platform.system() == "Windows":
-                details[command] = self.__cmd_utils.run_cmd_shell_true(command)
-            else:
-                details[command] = self.__cmd_utils.run_cmd_shell_true([command])
-
-            self.command_dict['commands'][command]['status'] = status_finished
-            end_time = datetime.datetime.now()
-            self.command_dict['commands'][command]['finishedat'] = str(end_time)
-            self.command_dict['commands'][command]['duration'] = (end_time - start_time).total_seconds()
-            self.command_dict['commands'][command]['details'] = details[command]
+    def get_command_dict(self):
+        return self.command_dict

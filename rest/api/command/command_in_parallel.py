@@ -1,10 +1,9 @@
+import asyncio
 import datetime
 import platform
-import shlex
-from multiprocessing import Process, Manager
 
 from rest.api.definitions import command_detached_init
-from rest.utils.cmd_utils import CmdUtils
+from rest.utils.cmd_utils_async import CmdUtilsAsync
 from rest.utils.io_utils import IOUtils
 
 
@@ -12,57 +11,51 @@ class CommandInParallel:
 
     def __init__(self):
         self.command_dict = command_detached_init
-        self.__cmd_utils = CmdUtils()
+        self.__cmd_utils = CmdUtilsAsync()
         self.__io_utils = IOUtils()
 
-    def run_command(self, manager_dict, dictionary, command):
+    async def run_command(self, command):
         status_finished = "finished"
         status_in_progress = "in progress"
-        dictionary['commands'][command] = {}
-        dictionary['commands'][command]['status'] = status_in_progress
-        start = datetime.datetime.now()
-        dictionary['commands'][command]['startedat'] = str(start)
+        self.command_dict['commands'][command] = {}
+        self.command_dict['commands'][command]['status'] = status_in_progress
+        start_time = datetime.datetime.now()
+        self.command_dict['commands'][command]['startedat'] = str(start_time)
 
         if platform.system() == "Windows":
-            details = self.__cmd_utils.run_cmd_shell_true(command)
+            self.command_dict['commands'][command]['details'] = await self.__cmd_utils.run_cmd_async(command)
         else:
-            details = self.__cmd_utils.run_cmd_shell_true([command])
+            self.command_dict['commands'][command]['details'] = await self.__cmd_utils.run_cmd_async([command])
 
-        dictionary['commands'][command]['status'] = status_finished
-        end = datetime.datetime.now()
-        dictionary['commands'][command]['finishedat'] = str(end)
-        dictionary['commands'][command]['duration'] = (end - start).total_seconds()
-        dictionary['commands'][command]['details'] = details
+        self.command_dict['commands'][command]['status'] = status_finished
+        end_time = datetime.datetime.now()
+        self.command_dict['commands'][command]['finishedat'] = str(end_time)
+        self.command_dict['commands'][command]['duration'] = (end_time - start_time).total_seconds()
 
-        manager_dict[command] = {}
-        manager_dict[command] = dictionary['commands'][command.strip()]
+        return command
 
     def run_commands(self, commands):
-        with Manager() as manager:
-            try:
-                manager_dict = manager.dict()
-                start_time = datetime.datetime.now()
+        start_time = datetime.datetime.now()
 
-                processes = [Process(target=self.run_command, args=(manager_dict, self.command_dict, command,)) for
-                             command in commands]
+        if platform.system() == "Windows":
+            loop = asyncio.ProactorEventLoop()
+            asyncio.set_event_loop(loop)
+        else:
+            loop = asyncio.get_event_loop()
 
-                # start processes
-                for p in processes:
-                    p.start()
+        loop.run_until_complete(self.main_asyncio(commands))
+        loop.close()
 
-                # join them after they started
-                for p in processes:
-                    p.join()
+        end_time = datetime.datetime.now()
 
-                self.command_dict['commands'] = dict(manager_dict)
-
-                self.command_dict['finished'] = "true"
-                self.command_dict['started'] = "false"
-                end_time = datetime.datetime.now()
-                self.command_dict['finishedat'] = str(end_time)
-                self.command_dict['duration'] = (end_time - start_time).total_seconds()
-
-            except Exception as e:
-                raise e
+        self.command_dict['finished'] = "true"
+        self.command_dict['started'] = "false"
+        self.command_dict['finishedat'] = str(end_time)
+        self.command_dict['duration'] = (end_time - start_time).total_seconds()
 
         return self.command_dict
+
+    async def main_asyncio(self, commands):
+        cmds_list = [self.run_command(command) for command in commands]
+        for cmd in asyncio.as_completed(cmds_list):
+            print(await cmd)

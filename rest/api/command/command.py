@@ -62,3 +62,6 @@ class Command:
         self.command_dict['commands'][command]['duration'] = (end_time - start_time).total_seconds()
         self.command_dict['commands'][command]['details'] = details[command]
         self.__io_utils.write_to_file_dict(json_file, self.command_dict)
+
+    def get_command_dict(self):
+        return self.command_dict
