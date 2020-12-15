@@ -3,10 +3,11 @@ import unittest
 
 import yaml
 
+from rest.model.config_loader import ConfigLoader
 from rest.utils.yaml_cmds_splitter import YamlCommandsSplitter
 
 
-class YamlCommandsSplitterTestCase(unittest.TestCase):
+class ConfigLoaderTestCase(unittest.TestCase):
 
     def test_full_yml(self):
         yaml_config_string = """
@@ -25,7 +26,7 @@ class YamlCommandsSplitterTestCase(unittest.TestCase):
         after_script:
           - echo after_script
         """
-        splitter = YamlCommandsSplitter(yaml.safe_load(yaml_config_string))
+        splitter = YamlCommandsSplitter(ConfigLoader.load(yaml_config_string).get_config())
         self.assertEqual(len(splitter.get_cmds_in_order()), 6)
 
     def test_full_yml_skipped_key(self):
@@ -47,7 +48,7 @@ class YamlCommandsSplitterTestCase(unittest.TestCase):
         after_script:
           - echo after_script
         """
-        splitter = YamlCommandsSplitter(yaml.safe_load(yaml_config_string))
+        splitter = YamlCommandsSplitter(ConfigLoader.load(yaml_config_string).get_config())
         self.assertEqual(len(splitter.get_cmds_in_order()), 6)
 
     def test_missing_before_yml(self):
@@ -60,11 +61,13 @@ class YamlCommandsSplitterTestCase(unittest.TestCase):
         after_script:
           - echo after_script
         """
-        splitter = YamlCommandsSplitter(yaml.safe_load(yaml_config_string))
+        splitter = YamlCommandsSplitter(ConfigLoader.load(yaml_config_string).get_config())
         self.assertEqual(len(splitter.get_cmds_in_order()), 2)
 
     def test_all_present(self):
         yaml_config_string = """
+        env:
+          FOO: BAR
         before_install:
           - echo before_install
         install:
@@ -78,9 +81,10 @@ class YamlCommandsSplitterTestCase(unittest.TestCase):
         after_install:
           - echo after_install
         """
-        splitter = YamlCommandsSplitter(yaml.safe_load(yaml_config_string))
+        splitter = YamlCommandsSplitter(ConfigLoader.load(yaml_config_string).get_config())
         self.assertEqual(len(splitter.get_cmds_in_order()), 6)
         self.assertEqual(splitter.get_cmds_in_order()[2], "echo after_install")
+        self.assertEqual(ConfigLoader.load(yaml_config_string).get_config().get('env').get('FOO'), "BAR")
 
     def test_missing_after_yml(self):
         yaml_config_string = """
@@ -92,7 +96,7 @@ class YamlCommandsSplitterTestCase(unittest.TestCase):
           - echo script
         after_script:
         """
-        splitter = YamlCommandsSplitter(yaml.safe_load(yaml_config_string))
+        splitter = YamlCommandsSplitter(ConfigLoader.load(yaml_config_string).get_config())
         self.assertEqual(len(splitter.get_cmds_in_order()), 2)
 
     def test_missing_script_yml(self):
@@ -106,7 +110,7 @@ class YamlCommandsSplitterTestCase(unittest.TestCase):
           - echo after_script
         """
         try:
-            YamlCommandsSplitter(yaml.safe_load(yaml_config_string)).get_cmds_in_order()
+            YamlCommandsSplitter(ConfigLoader.load(yaml_config_string).get_config()).get_cmds_in_order()
         except Exception as e:
             self.assertEqual("Mandatory section 'script' was not found or it was empty.", e.__str__())
 

@@ -61,9 +61,10 @@ class EnvironmentSingleton:
 
     def set_env_vars(self, env_vars):
         env_vars_set = {}
-        for key, value in env_vars.items():
-            if self.set_env_var(key, value):
-                env_vars_set[key] = value
+        if isinstance(env_vars, dict):
+            for key, value in env_vars.items():
+                if self.set_env_var(key, value):
+                    env_vars_set[key] = value
 
         return env_vars_set
 

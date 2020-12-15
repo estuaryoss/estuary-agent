@@ -10,6 +10,7 @@ class CmdUtils:
     @staticmethod
     def run_cmd_detached(command):
         p = subprocess.Popen(command, env=EnvironmentSingleton.get_instance().get_env_and_virtual_env())
+
         print("Opened pid {} for command {}".format(p.pid, command))
 
     @staticmethod
@@ -24,9 +25,7 @@ class CmdUtils:
                                                                                   suffix=".out"), \
                                        CommandHasher.get_cmd_for_file_encode_list(command=list_cmd, cmd_id=cmd_id,
                                                                                   suffix=".err")
-
-        IOUtils.delete_files([file_path_out, file_path_err])
-        IOUtils.create_files([file_path_out, file_path_err])
+        IOUtils.recreate_files([file_path_out, file_path_err])
         with open(file_path_out, 'w') as fh_out, open(file_path_err, 'w') as fh_err:
             p = subprocess.Popen(list_cmd[0], stdout=fh_out, stderr=fh_err,
                                  env=EnvironmentSingleton.get_instance().get_env_and_virtual_env(), shell=True)
@@ -35,13 +34,11 @@ class CmdUtils:
 
     @staticmethod
     def run_cmd_shell_true_to_file_str(str_cmd, cmd_id):
-        file_path_out, file_path_err = CommandHasher.get_cmd_for_file_encode_str(command=str_cmd, cmd_id=cmd_id,
-                                                                                 suffix=".out"), \
-                                       CommandHasher.get_cmd_for_file_encode_str(command=str_cmd, cmd_id=cmd_id,
-                                                                                 suffix=".err")
+        file_path_out, file_path_err = \
+            CommandHasher.get_cmd_for_file_encode_str(command=str_cmd, cmd_id=cmd_id, suffix=".out"), \
+            CommandHasher.get_cmd_for_file_encode_str(command=str_cmd, cmd_id=cmd_id, suffix=".err")
 
-        IOUtils.delete_files([file_path_out, file_path_err])
-        IOUtils.create_files([file_path_out, file_path_err])
+        IOUtils.recreate_files([file_path_out, file_path_err])
         with open(file_path_out, 'w') as fh_out, open(file_path_err, 'w') as fh_err:
             p = subprocess.Popen(str_cmd, stdout=fh_out, stderr=fh_err,
                                  env=EnvironmentSingleton.get_instance().get_env_and_virtual_env(), shell=True)

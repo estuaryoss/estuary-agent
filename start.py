@@ -23,7 +23,7 @@ def cli(cid, args):
         raise Exception(f"Error: --args argument was not set. Value: {str(args)}")
 
     io_utils = IOUtils()
-    io_utils.append_to_file("command_info_logger.txt", f"{sys.argv[0]} --id={cid} --args={args}")
+    io_utils.append_to_file("command_info_logger.txt", f"{sys.argv[0]} --cid={cid} --args={args}")
 
     IOUtils.create_dir(EnvInit.CMD_DETACHED_DIR)
     IOUtils.create_dir(EnvInit.CMD_DETACHED_STREAMS)
