@@ -806,6 +806,30 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('path'))
 
     @parameterized.expand([
+        "env"
+    ])
+    def test_executecommandyaml_env_missing(self, sub_config):
+        with open(f"{FlaskServerTestCase.script_path}/config.yml", closefd=True) as f:
+            string_payload = f.read()
+        payload = yaml.safe_load(string_payload)
+        payload.pop(sub_config)
+
+        response = requests.post(
+            self.server + f"/commandyaml",
+            data=yaml.dump(payload, Dumper=yaml.Dumper, indent=4))
+
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get("message"),
+                         ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
+        self.assertEqual(body.get('version'), properties.get('version'))
+        self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
+        self.assertGreaterEqual(len(body.get('description').get('description').get('commands')), 3)
+        self.assertDictContainsSubset(payload, body.get('description').get('config'))
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    @parameterized.expand([
         "script"
     ])
     def test_executecommandyaml_fields_not_permitted_to_miss(self, sub_config):

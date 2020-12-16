@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from flask_swagger_ui import get_swaggerui_blueprint
 
@@ -13,12 +14,12 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 
 command_detached_init = {
-    "finished": False,
     "started": False,
+    "finished": False,
+    "id": "none",
+    "pid": os.getpid(),
     "startedat": str(datetime.datetime.now()),
     "finishedat": str(datetime.datetime.now()),
     "duration": 0.000000,
-    "id": "none",
-    "pid": 0,
     "commands": {}
 }

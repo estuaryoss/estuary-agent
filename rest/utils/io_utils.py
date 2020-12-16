@@ -20,8 +20,7 @@ class IOUtils:
     @staticmethod
     def create_file(file):
         file = Path(file)
-        if not file.exists():
-            IOUtils.write_to_file(file, "")
+        file.touch() if not file.exists() else None
 
     @staticmethod
     def read_last_line(file):
@@ -31,14 +30,14 @@ class IOUtils:
             return last_line
 
     @staticmethod
-    def append_to_file(file, content=""):
+    def append_to_file(file, content):
         with open(file, 'a') as f:
-            f.write(content + "\n")
+            f.write(content + "\n") if content else None
 
     @staticmethod
-    def write_to_file_binary(file, content=""):
+    def write_to_file_binary(file, content):
         with open(file, 'wb') as f:
-            f.write(content)
+            f.write(content) if content else None
 
     @staticmethod
     def write_to_file_dict(file, content):
@@ -101,6 +100,12 @@ class IOUtils:
     @staticmethod
     def create_files(files):
         for file in files:
+            IOUtils.create_file(file)
+
+    @staticmethod
+    def recreate_files(files):
+        for file in files:
+            IOUtils.delete_file(file)
             IOUtils.create_file(file)
 
     @classmethod

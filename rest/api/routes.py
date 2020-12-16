@@ -26,12 +26,10 @@ from rest.api.loghelpers.message_dumper import MessageDumper
 from rest.api.responsehelpers.error_codes import ErrorMessage
 from rest.api.responsehelpers.http_response import HttpResponse
 from rest.api.swagger import swagger_file_content
-from rest.environment.env_vars_setter import EnvVarsSetter
 from rest.environment.environment import EnvironmentSingleton
 from rest.model.config_descriptor import ConfigDescriptor
 from rest.model.config_loader import ConfigLoader
 from rest.service.fluentd import Fluentd
-from rest.service.restapi import RestApi
 from rest.state.state_holder import StateHolder
 from rest.utils.cmd_utils import CmdUtils
 from rest.utils.env_startup import EnvStartupSingleton
@@ -54,10 +52,9 @@ env = EnvironmentSingleton.get_instance()
 
 @app.errorhandler(ApiException)
 def handle_api_error(e):
-    return Response(json.dumps(
-        HttpResponse().response(code=e.code, message=e.message,
-                                description="Exception({})".format(e.exception.__str__()))),
-        500, mimetype="application/json")
+    return Response(json.dumps(HttpResponse().response(
+        code=e.code, message=e.message, description="Exception({})".format(e.exception.__str__()))), 500,
+        mimetype="application/json")
 
 
 @app.before_request
@@ -209,8 +206,8 @@ def get_cmd_detached_info():
                     IOUtils.read_file(CommandHasher.get_cmd_for_file_encode_str(key, cmd_id, ".err"))
             except Exception as e:
                 app.logger.debug("Exception({})".format(e.__str__()))
-        cmd_detached_response["processes"] = [p.info for p in
-                                              psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
+        cmd_detached_response["processes"] = \
+            [p.info for p in psutil.process_iter(attrs=['pid', 'name', 'username', 'status'])]
 
     except Exception as e:
         raise ApiException(ApiCode.GET_COMMAND_DETACHED_INFO_FAILURE,
@@ -252,14 +249,13 @@ def get_cmd_detached_info_id(command_id):
 
 
 @app.route('/commanddetached/<command_id>', methods=['POST'])
-def cmd_detached_start(command_id):
+def cmd_detached_start(command_id, internal_data=None):
     command_id = command_id.strip()
-    command = []
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
     http = HttpResponse()
-    start_py_path = str(Path(".").absolute()) + "/start.py"
-    input_data = request.data.decode("UTF-8", "replace").strip()
+    start_py_path = str(Path(".").absolute()) + os.path.sep + "start.py"
+    input_data = internal_data if internal_data else request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
         raise ApiException(ApiCode.EMPTY_REQUEST_BODY_PROVIDED.value,
@@ -275,9 +271,7 @@ def cmd_detached_start(command_id):
         command_detached_init["id"] = command_id
         io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
         os.chmod(start_py_path, stat.S_IRWXU)
-        command.insert(0, "--args=" + ";;".join(input_data_list))  # commands as args separated by ;;
-        command.insert(0, "--cid=" + command_id)  # first arg is command id
-        command.insert(0, start_py_path)
+        command = [start_py_path, f"--cid={command_id}", f"--args={';;'.join(input_data_list)}"]
         cmd_utils.run_cmd_detached(command)
         StateHolder.set_last_command(command_id)
     except Exception as e:
@@ -331,9 +325,6 @@ def command_detached_stop_by_id(command_id):
 def command_detached_start_yaml(command_id):
     command_id = command_id.strip()
     http = HttpResponse()
-    self_ip = "127.0.0.1"
-    protocol = "https" if EnvStartupSingleton.get_instance().get_config_env_vars().get(
-        EnvConstants.HTTPS_ENABLE) else "http"
     input_data = request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
@@ -349,41 +340,20 @@ def command_detached_start_yaml(command_id):
         raise ApiException(ApiCode.INVALID_YAML_CONFIG.value,
                            ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_YAML_CONFIG.value), e)
     try:
-        conn = {
-            "protocol": protocol,
-            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
-            "ip": self_ip,
-            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
-            "endpoint": f"/env"
-        }
-        evs = EnvVarsSetter(conn=conn, config=config_loader.get_config())
-        response = evs.set_env_vars(headers=request.headers)
-        env_vars_set = response.json().get("description")
-        if response.status_code != 200:
-            raise Exception(response.json().get("description"))
+        env_vars_set = EnvironmentSingleton.get_instance().set_env_vars(config_loader.get_config().get('env'))
     except Exception as e:
         raise ApiException(ApiCode.SET_ENV_VAR_FAILURE.value,
-                           ErrorMessage.HTTP_CODE.get(ApiCode.SET_ENV_VAR_FAILURE.value) % evs.get_env_vars(), e)
+                           ErrorMessage.HTTP_CODE.get(ApiCode.SET_ENV_VAR_FAILURE.value) %
+                           json.dumps(config_loader.get_config().get('env')), e)
 
     try:
-        conn = {
-            "protocol": protocol,
-            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
-            "ip": self_ip,
-            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
-            "endpoint": f"/commanddetached/{command_id}"
-        }
-        rest_service = RestApi(conn)
-        response = rest_service.post(data=cmds_list_as_string, headers=request.headers)
-        if response.status_code != 202:
-            raise Exception(response.json().get("description"))
-        StateHolder.set_last_command(command_id)
+        cmd_detached_start(command_id, cmds_list_as_string)
     except Exception as e:
         raise ApiException(ApiCode.COMMAND_DETACHED_START_FAILURE.value,
                            ErrorMessage.HTTP_CODE.get(ApiCode.COMMAND_DETACHED_START_FAILURE.value) % command_id, e)
 
     # only env vars that were set
-    config_loader.get_config()[evs.get_env_key()] = env_vars_set
+    config_loader.get_config()['env'] = env_vars_set
     return Response(
         json.dumps(
             http.response(ApiCode.SUCCESS.value, ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value),
@@ -460,9 +430,9 @@ def get_results_folder():
 
 
 @app.route('/command', methods=['POST', 'PUT'])
-def execute_command():
+def execute_command(internal_data=None):
     http = HttpResponse()
-    input_data = request.get_data(as_text=True).strip()
+    input_data = internal_data if internal_data else request.get_data(as_text=True).strip()
 
     if not input_data:
         raise ApiException(ApiCode.EMPTY_REQUEST_BODY_PROVIDED.value,
@@ -487,9 +457,6 @@ def execute_command_yaml():
     env.set_env_var(EnvConstants.TEMPLATE, "start.py")
     env.set_env_var(EnvConstants.VARIABLES, "commandinfo.json")
     http = HttpResponse()
-    self_ip = "127.0.0.1"
-    protocol = "https" if EnvStartupSingleton.get_instance().get_config_env_vars().get(
-        EnvConstants.HTTPS_ENABLE) else "http"
     input_data = request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
@@ -505,44 +472,23 @@ def execute_command_yaml():
         raise ApiException(ApiCode.INVALID_YAML_CONFIG.value,
                            ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_YAML_CONFIG.value), e)
     try:
-        conn = {
-            "protocol": protocol,
-            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
-            "ip": self_ip,
-            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
-            "endpoint": f"/env"
-        }
-        evs = EnvVarsSetter(conn=conn, config=config_loader.get_config())
-        response = evs.set_env_vars(headers=request.headers)
-        env_vars_set = response.json().get("description")
-        if response.status_code != 200:
-            raise Exception(response.json().get("description"))
+        env_vars_set = EnvironmentSingleton.get_instance().set_env_vars(config_loader.get_config().get('env'))
     except Exception as e:
         raise ApiException(ApiCode.SET_ENV_VAR_FAILURE.value,
-                           ErrorMessage.HTTP_CODE.get(ApiCode.SET_ENV_VAR_FAILURE.value) % evs.get_env_vars(), e)
+                           ErrorMessage.HTTP_CODE.get(
+                               ApiCode.SET_ENV_VAR_FAILURE.value) % config_loader.get_config().get('env'), e)
 
     try:
-        conn = {
-            "protocol": protocol,
-            "cert": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.HTTPS_CERT),
-            "ip": self_ip,
-            "port": EnvStartupSingleton.get_instance().get_config_env_vars().get(EnvConstants.PORT),
-            "endpoint": f"/command",
-            "timeout": 3600
-        }
-        rest_service = RestApi(conn)
-        response = rest_service.post(data=cmds_list_as_string, headers=request.headers)
-        if response.status_code != 200:
-            raise Exception(response.json().get("description"))
+        body = json.loads(execute_command(internal_data=cmds_list_as_string).get_data())
     except Exception as e:
         raise ApiException(ApiCode.COMMAND_EXEC_FAILURE.value,
                            ErrorMessage.HTTP_CODE.get(ApiCode.COMMAND_EXEC_FAILURE.value), e)
 
     # only env vars that were set
-    config_loader.get_config()[evs.get_env_key()] = env_vars_set
+    config_loader.get_config()['env'] = env_vars_set
     return Response(
         json.dumps(http.response(ApiCode.SUCCESS.value, ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value),
-                                 ConfigDescriptor.description(response.json().get("description"),
+                                 ConfigDescriptor.description(body.get('description'),
                                                               config_loader.get_config()))), 200,
         mimetype="application/json")
 

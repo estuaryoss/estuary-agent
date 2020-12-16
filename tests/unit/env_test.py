@@ -4,7 +4,7 @@ import unittest
 from rest.environment.environment import EnvironmentSingleton
 
 
-class RenderTestCase(unittest.TestCase):
+class EnvTestCase(unittest.TestCase):
 
     def test_load_env_empty_virt_env(self):
         env = EnvironmentSingleton.get_instance()

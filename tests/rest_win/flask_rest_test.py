@@ -389,7 +389,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(body.get('description'), test_id)
 
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -452,7 +452,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(body.get('description'), test_id)
 
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         out_begin = body.get('description').get("commands").get(command).get("details").get('out')
@@ -480,7 +480,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('description'), test_id)
         self.assertEqual(body.get('description').get('config'), payload)
 
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(response.status_code, 200)
@@ -565,9 +565,10 @@ class FlaskServerTestCase(unittest.TestCase):
         # self.assertEqual(body.get('description').get("started"), False)
 
     def test_command_stop_by_id_p(self):
-        test_id = "100"
-        test_id2 = "101"
-        data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"
+        test_id = "15"
+        test_id2 = "16"
+        data_payload = f"ping -n 7 127.0.0.1\n ping -n 15 127.0.0.1\n ping -n {test_id} 127.0.0.1"
+        data_payload2 = f"ping -n 7 127.0.0.1\n ping -n 15 127.0.0.1\n ping -n {test_id2} 127.0.0.1"
         commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
         headers = {'Content-type': 'text/plain'}
 
@@ -576,7 +577,7 @@ class FlaskServerTestCase(unittest.TestCase):
             data=f"{data_payload}", headers=headers)
         response2 = requests.post(
             self.server + f"/commanddetached/{test_id2}",
-            data=f"{data_payload}", headers=headers)
+            data=f"{data_payload2}", headers=headers)
         body = response.json()
         body2 = response2.json()
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
@@ -600,7 +601,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertEqual(body.get('description'), ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
-        time.sleep(1)
+        time.sleep(2)
         response = requests.get(self.server + f"/commanddetached/{test_id}")
         response2 = requests.get(self.server + f"/commanddetached/{test_id2}")
         self.assertEqual(response.status_code, 200)
