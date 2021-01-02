@@ -1061,16 +1061,16 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('path'))
 
     def test_setenv_endpoint_namenotset_n(self):
-        payload = json.dumps("whateverinvalid")
+        payload = "whateverinvalid"
         headers = {'Content-type': 'application/json'}
 
         response = requests.post(self.server + f"/env", data=payload, headers=headers)
         body = response.json()
         self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
-        self.assertEqual(body.get("message"), ErrorMessage.HTTP_CODE.get(ApiCode.SET_ENV_VAR_FAILURE.value) % payload)
+        self.assertEqual(body.get("message"), ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_JSON_PAYLOAD.value) % payload)
         self.assertEqual(body.get('version'), properties.get('version'))
-        self.assertEqual(body.get('code'), ApiCode.SET_ENV_VAR_FAILURE.value)
+        self.assertEqual(body.get('code'), ApiCode.INVALID_JSON_PAYLOAD.value)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 

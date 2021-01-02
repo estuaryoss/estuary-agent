@@ -38,8 +38,8 @@ def cli(cid, args):
     except Exception as e:
         raise e
 
-    command_runner = Command()
-    dictionary = command_runner.run_commands(json_file_path, command_id, command_list)
+    command_runner = Command(cmd_id=command_id, json_file=json_file_path)
+    dictionary = command_runner.run_commands(command_list)
     print(json.dumps(dictionary) + "\n")
 
 
