@@ -164,10 +164,7 @@ def set_env():
         raise ApiException(ApiCode.INVALID_JSON_PAYLOAD.value,
                            ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_JSON_PAYLOAD.value) % str(input_data), e)
     try:
-        for key, value in env_vars_attempted.items():
-            env.set_env_var(key, value)
-
-        env_vars_added = {key: value for key, value in env_vars_attempted.items() if key in env.get_virtual_env()}
+        env_vars_added = env.set_env_vars(env_vars_attempted)
     except Exception as e:
         raise ApiException(ApiCode.SET_ENV_VAR_FAILURE.value,
                            ErrorMessage.HTTP_CODE.get(ApiCode.SET_ENV_VAR_FAILURE.value) % str(input_data), e)

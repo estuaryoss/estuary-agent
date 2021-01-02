@@ -1031,7 +1031,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('path'))
 
     def test_setenv_endpoint_namenotset_n(self):
-        payload = json.dumps("whateverinvalid")
+        payload = "whateverinvalid"
         headers = {'Content-type': 'application/json'}
 
         response = requests.post(self.server + f"/env", data=payload, headers=headers)
