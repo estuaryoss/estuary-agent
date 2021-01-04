@@ -52,4 +52,8 @@ WORKDIR $SCRIPTS_DIR
 RUN pip3 install -r $SCRIPTS_DIR/requirements.txt
 RUN pip3 install uwsgi
 
-CMD ["/scripts/main_flask.py"]
+# for cmds in background
+ADD https://estuary-agent-go.s3.eu-central-1.amazonaws.com/4.1.0/runcmd-alpine $SCRIPTS_DIR/runcmd
+RUN chmod +x $SCRIPTS_DIR/runcmd
+
+CMD ["/scripts/main.py"]

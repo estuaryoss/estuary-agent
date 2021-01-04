@@ -23,11 +23,8 @@ jobs:
           command: Copy-Item "dist\main_flask.exe" -Destination "main-win.exe"
           name: "copy main-win"
       - run:
-          command: pyinstaller --onefile --clean start.py
-          name: "build start.py"
-      - run:
-          command: Copy-Item "dist\start.exe" -Destination "start.py"
-          name: "copy start.py"
+          command: $ProgressPreference = "SilentlyContinue"; wget https://estuary-agent-go.s3.eu-central-1.amazonaws.com/4.1.0/runcmd.exe -o runcmd.exe
+          name: "download runcmd.exe"
       - run:
           command: Start-Process .\main-win.exe
           name: "start main-win"
@@ -42,9 +39,6 @@ jobs:
           name: "run unit tests"
       - store_artifacts:
           path: main-win.exe
-      - store_artifacts:
-          path: start.py
-          destination: start.py-win
 workflows:
   main:
     jobs:

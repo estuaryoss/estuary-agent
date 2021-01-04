@@ -378,7 +378,7 @@ class FlaskServerTestCase(unittest.TestCase):
     ])
     def test_get_command_info(self, payload):
         test_id = "103"
-        data_payload = f" sleep {payload} \n invalid_command"
+        data_payload = f"sleep {payload}\ninvalid_command"
         commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
@@ -400,7 +400,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertNotEqual(body.get('description').get('startedat'), "none")
         self.assertNotEqual(body.get('description').get('finishedat'), "none")
         self.assertEqual(round(int(body.get('description').get('duration'))), 0)
-        self.assertIsInstance(body.get('description').get('duration'), float)
+        self.assertIsInstance(body.get('description').get('duration'), int)
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "scheduled")
 
@@ -410,7 +410,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
         self.assertNotEqual(body.get('description').get("commands").get(commands[0]).get('startedat'), "none")
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get('finishedat'),
-                         None)  # its not yet written
+                         "")  # its not yet written
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details"),
                               dict)  # is empty because the details are filled after exec
         time.sleep(int(payload) + 2)
@@ -430,7 +430,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("details").get("err"), "")
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("code"), int)
-        self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("args"), str)
+        self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("args"), list)
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "finished")
         self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get("startedat"), "none")
         self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get("finishedat"), "none")
@@ -439,7 +439,7 @@ class FlaskServerTestCase(unittest.TestCase):
                       body.get('description').get("commands").get(commands[1]).get("details").get("err"))
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
-        self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), str)
+        self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), list)
 
     def test_get_command_stream_info(self):
         test_id = "103_stream"
@@ -520,7 +520,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
     def test_gettestinfo_rm_commands_200_p(self):
         test_id = "101"
-        data_payload = f"rm -rf /etc \n ls -lrt \n colrm doesnotmatter"
+        data_payload = f"rm -rf /etc\nls -lrt\ncolrm doesnotmatter"
         commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
@@ -551,7 +551,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
     def test_command_stop_p(self):
         test_id = "100"
-        data_payload = f"sleep 7 \n sleep 3600 \n sleep 3601"
+        data_payload = f"sleep 7\nsleep 20\nsleep 30"
         commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
@@ -585,15 +585,16 @@ class FlaskServerTestCase(unittest.TestCase):
         # self.assertEqual(body.get('description').get("started"), False)
 
     def test_command_stop_by_id_p(self):
-        test_id = "100"
-        test_id2 = "101"
-        data_payload = f"sleep 7 \n sleep 3600 \n sleep 3601"
+        test_id = "1000"
+        test_id2 = "1001"
+        data_payload = f"sleep 7\nsleep 20\nsleep 21"
         commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
         headers = {'Content-type': 'text/plain'}
 
         response = requests.post(
             self.server + f"/commanddetached/{test_id}",
             data=f"{data_payload}", headers=headers)
+        time.sleep(2)
         response2 = requests.post(
             self.server + f"/commanddetached/{test_id2}",
             data=f"{data_payload}", headers=headers)

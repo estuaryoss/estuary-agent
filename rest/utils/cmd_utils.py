@@ -8,10 +8,12 @@ from rest.utils.io_utils import IOUtils
 class CmdUtils:
 
     @staticmethod
-    def run_cmd_detached(command):
+    def start_cmd_detached(command):
         p = subprocess.Popen(command, env=EnvironmentSingleton.get_instance().get_env_and_virtual_env())
 
         print("Opened pid {} for command {}".format(p.pid, command))
+
+        return p.pid
 
     @staticmethod
     def run_cmd_shell_true(command):
