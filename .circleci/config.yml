@@ -17,10 +17,10 @@ jobs:
           command: pip install pypiwin32
           name: "install pypiwin32"
       - run:
-          command: pyinstaller --onefile --clean main_flask.py
+          command: pyinstaller --onefile --clean main.py
           name: "build main-win"
       - run:
-          command: Copy-Item "dist\main_flask.exe" -Destination "main-win.exe"
+          command: Copy-Item "dist\main.exe" -Destination "main-win.exe"
           name: "copy main-win"
       - run:
           command: $ProgressPreference = "SilentlyContinue"; wget https://estuary-agent-go.s3.eu-central-1.amazonaws.com/4.1.0/runcmd.exe -o runcmd.exe
