@@ -17,14 +17,14 @@ WORKDIR $SCRIPTS_DIR
 COPY inputs/templates/ $TEMPLATES_DIR/
 COPY inputs/variables/ $VARS_DIR/
 
-COPY main-linux $SCRIPTS_DIR
-#copy start script, actually this is a binary
-COPY start.py-linux $SCRIPTS_DIR/start.py
+COPY dist/main $SCRIPTS_DIR
+#copy runcmd exec for the commands executed in background
+ADD https://estuary-agent-go.s3.eu-central-1.amazonaws.com/4.1.0/runcmd-linux $SCRIPTS_DIR/runcmd
 COPY https/key.pem $HTTPS_DIR/
 COPY https/cert.pem $HTTPS_DIR/
 
-# ADD https://github.com/dinuta/estuary-agent/releases/download/4.0.1/main-linux $SCRIPTS_DIR
-RUN chmod +x $SCRIPTS_DIR/main-linux
-RUN chmod +x $SCRIPTS_DIR/start.py
+# ADD https://github.com/dinuta/estuary-agent-go/releases/download/4.0.1/main-linux $SCRIPTS_DIR
+RUN chmod +x $SCRIPTS_DIR/main
+RUN chmod +x $SCRIPTS_DIR/runcmd
 
-CMD ["/root/agent/main-linux"]
+CMD ["/root/agent/main"]

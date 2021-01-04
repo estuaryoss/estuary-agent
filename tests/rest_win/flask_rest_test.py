@@ -372,12 +372,10 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 
-    @parameterized.expand([
-        "4"
-    ])
-    def test_gettestinfo_p(self, payload):
+    def test_gettestinfo_p(self):
+        payload = 5
         test_id = "103"
-        data_payload = f" ping -n {payload} 127.0.0.1 \n invalid_command"
+        data_payload = f"ping -n {payload} 127.0.0.1\ninvalid_command"
         commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
@@ -402,13 +400,13 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "scheduled")
 
-        time.sleep(int(payload) - 2)
+        time.sleep(1)
         response = requests.get(self.server + "/commanddetached")
         body = response.json()
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("status"), "in progress")
         self.assertNotEqual(body.get('description').get("commands").get(commands[0]).get('startedat'), "none")
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get('finishedat'),
-                         None)  # its not yet written
+                         "")  # its not yet written
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details"),
                               dict)  # is empty because the details are filled after exec
         time.sleep(int(payload) + 2)
@@ -428,7 +426,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get("commands").get(commands[0]).get("details").get("err"), "")
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("code"), int)
-        self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("args"), str)
+        self.assertIsInstance(body.get('description').get("commands").get(commands[0]).get("details").get("args"), list)
         self.assertEqual(body.get('description').get("commands").get(commands[1]).get("status"), "finished")
         self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get("startedat"), "none")
         self.assertNotEqual(body.get('description').get("commands").get(commands[1]).get("finishedat"), "none")
@@ -437,7 +435,7 @@ class FlaskServerTestCase(unittest.TestCase):
                       body.get('description').get("commands").get(commands[1]).get("details").get("err"))
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("pid"), int)
         self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("code"), int)
-        self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), str)
+        self.assertIsInstance(body.get('description').get("commands").get(commands[1]).get("details").get("args"), list)
 
     def test_get_command_stream_info(self):
         test_id = "103_stream"
@@ -528,7 +526,7 @@ class FlaskServerTestCase(unittest.TestCase):
 
     def test_command_stop_p(self):
         test_id = "100"
-        data_payload = f"ping -n 7 127.0.0.1\n ping -n 3600 127.0.0.1\n ping -n 3601 127.0.0.1"
+        data_payload = f"ping -n 7 127.0.0.1\nping -n 3600 127.0.0.1\nping -n 3601 127.0.0.1"
         commands = [x.strip() for x in data_payload.split("\n")]
         headers = {'Content-type': 'text/plain'}
 
@@ -567,8 +565,8 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_command_stop_by_id_p(self):
         test_id = "15"
         test_id2 = "16"
-        data_payload = f"ping -n 7 127.0.0.1\n ping -n 15 127.0.0.1\n ping -n {test_id} 127.0.0.1"
-        data_payload2 = f"ping -n 7 127.0.0.1\n ping -n 15 127.0.0.1\n ping -n {test_id2} 127.0.0.1"
+        data_payload = f"ping -n 7 127.0.0.1\nping -n 15 127.0.0.1\nping -n {test_id} 127.0.0.1"
+        data_payload2 = f"ping -n 7 127.0.0.1\nping -n 15 127.0.0.1\nping -n {test_id2} 127.0.0.1"
         commands = list(map(lambda x: x.strip(), data_payload.split("\n")))
         headers = {'Content-type': 'text/plain'}
 
@@ -810,7 +808,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertIsNotNone(body.get('path'))
 
     def test_executecommand_grep_things_p(self):
-        file = "main_flask.py"
+        file = "main.py"
         command = "dir /B | findstr /R {}".format(file)
 
         response = requests.post(
@@ -1039,9 +1037,9 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertIn("Exception", body.get("description"))
         self.assertEqual(body.get("message"),
-                         ErrorMessage.HTTP_CODE.get(ApiCode.SET_ENV_VAR_FAILURE.value) % payload)
+                         ErrorMessage.HTTP_CODE.get(ApiCode.INVALID_JSON_PAYLOAD.value) % payload)
         self.assertEqual(body.get('version'), properties.get('version'))
-        self.assertEqual(body.get('code'), ApiCode.SET_ENV_VAR_FAILURE.value)
+        self.assertEqual(body.get('code'), ApiCode.INVALID_JSON_PAYLOAD.value)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
 

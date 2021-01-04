@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import stat
 from pathlib import Path
 from secrets import token_hex
@@ -251,7 +252,8 @@ def cmd_detached_start(command_id, internal_data=None):
     io_utils = IOUtils()
     cmd_utils = CmdUtils()
     http = HttpResponse()
-    start_py_path = str(Path(".").absolute()) + os.path.sep + "start.py"
+    execName = "runcmd.exe" if platform.system() == "Windows" else "runcmd"
+    runcmd_path = str(Path(".").absolute()) + os.path.sep + execName
     input_data = internal_data if internal_data else request.data.decode("UTF-8", "replace").strip()
 
     if not input_data:
@@ -265,11 +267,10 @@ def cmd_detached_start(command_id, internal_data=None):
 
     try:
         input_data_list = input_data.split("\n")
-        command_detached_init["id"] = command_id
-        io_utils.write_to_file_dict(StateHolder.get_last_command(), command_detached_init)
-        os.chmod(start_py_path, stat.S_IRWXU)
-        command = [start_py_path, f"--cid={command_id}", f"--args={';;'.join(input_data_list)}"]
-        cmd_utils.run_cmd_detached(command)
+        os.chmod(runcmd_path, stat.S_IRWXU)
+        command = [runcmd_path, f"--cid={command_id}", f"--args={';;'.join(input_data_list)}",
+                   "--enableStreams=true"]
+        pid = cmd_utils.start_cmd_detached(command)
         StateHolder.set_last_command(command_id)
     except Exception as e:
         raise ApiException(ApiCode.COMMAND_DETACHED_START_FAILURE.value,
