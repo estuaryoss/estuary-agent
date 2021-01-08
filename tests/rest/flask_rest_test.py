@@ -159,58 +159,6 @@ class FlaskServerTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    @parameterized.expand([
-        ("json.j2", "json.json"),
-        ("yml.j2", "yml.yml")
-    ])
-    def test_rend_endpoint(self, template, variables):
-        response = requests.get(self.server + "/render/" + template + "/" + variables)
-
-        body = yaml.safe_load(response.text)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(body), 3)
-
-    @parameterized.expand([
-        ("json.j2", "doesnotexists.json"),
-        ("yml.j2", "doesnotexists.yml")
-    ])
-    def test_rend_endpoint(self, template, variables):
-        expected = "Exception([Errno 2] No such file or directory:"
-
-        response = requests.get(self.server + "/render/" + template + "/" + variables)
-
-        body = response.json()
-        self.assertEqual(response.status_code, 500)
-        self.assertIn(expected, body.get("description"))
-
-    @parameterized.expand([
-        ("doesnotexists.j2", "json.json"),
-        ("doesnotexists.j2", "yml.yml")
-    ])
-    def test_rend_endpoint(self, template, variables):
-        expected = f"Exception"
-
-        response = requests.get(self.server + "/render/" + template + "/" + variables)
-
-        body = response.json()
-        self.assertEqual(response.status_code, 500)
-        self.assertIn(expected, body.get("description"))
-
-    @parameterized.expand([
-        ("standalone.yml", "variables.yml")
-    ])
-    @unittest.skipIf(str(os.environ.get('SKIP_ON_VM')) == "true", "Skip on VM")
-    def test_rendwithenv_endpoint(self, template, variables):
-        payload = {'DATABASE': 'mysql56', 'IMAGE': 'latest'}
-        headers = {'Content-type': 'application/json'}
-
-        response = requests.post(self.server + f"/render/{template}/{variables}", data=json.dumps(payload),
-                                 headers=headers)
-
-        body = yaml.safe_load(response.text)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(body.get("services")), 2)
-        self.assertEqual(int(body.get("version")), 3)
 
     def test_getfile_p(self):
         headers = {
