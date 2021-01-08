@@ -5,9 +5,9 @@ class ErrorMessage:
     HTTP_CODE = {
         ApiCode.SUCCESS.value: "Success",
         ApiCode.JINJA2_RENDER_FAILURE.value: "Jinja2 render failed",
-        ApiCode.GET_FILE_FAILURE.value: "Getting file or folder from the estuary agent service failed",
+        ApiCode.GET_FILE_FAILURE.value: "Getting file %s from the estuary agent service failed",
         ApiCode.COMMAND_DETACHED_START_FAILURE.value: "Starting detached command with id %s failed",
-        ApiCode.COMMAND_DETACHED_STOP_FAILURE.value: "Stopping running detached commands failed",
+        ApiCode.COMMAND_DETACHED_STOP_FAILURE.value: "Stopping running detached command failed",
         ApiCode.GET_FILE_FAILURE_IS_DIR.value: "Getting %s file failed. It is a directory, not a file.",
         ApiCode.GET_ENV_VAR_FAILURE.value: "Getting env var %s from the agent service failed.",
         ApiCode.MISSING_PARAMETER_POST.value: "Body parameter \"%s\" sent in request missing. Please include "
