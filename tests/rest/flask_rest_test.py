@@ -52,7 +52,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
-        self.assertEqual(len(headers.get('X-Request-ID')), 16)
+        self.assertGreaterEqual(len(headers.get('X-Request-ID')), 16)
 
     def test_getenv_endpoint_p(self):
         env_var = "VARS_DIR"
@@ -128,7 +128,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('code'), ApiCode.UNAUTHORIZED.value)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
-        self.assertEqual(len(headers.get('X-Request-ID')), 16)
+        self.assertGreaterEqual(len(headers.get('X-Request-ID')), 16)
 
     @unittest.skipIf(str(os.environ.get('SKIP_ON_VM')) == "true", "Skip on VM")
     def test_swagger_endpoint(self):
@@ -239,7 +239,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('code'), ApiCode.GET_FILE_FAILURE.value)
         self.assertIsNotNone(body.get('timestamp'))
         self.assertIsNotNone(body.get('path'))
-        self.assertEqual(len(headers.get('X-Request-ID')), 16)
+        self.assertGreaterEqual(len(headers.get('X-Request-ID')), 16)
 
     def test_getfolder_header_missing_n(self):
         header_key = 'Folder-Path'
@@ -1026,6 +1026,25 @@ class FlaskServerTestCase(unittest.TestCase):
         body = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(body.get('description'), payload)
+        self.assertEqual(body.get("message"), ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
+        self.assertEqual(body.get('version'), properties.get('version'))
+        self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
+        self.assertIsNotNone(body.get('timestamp'))
+        self.assertIsNotNone(body.get('path'))
+
+    def test_delete_virtual_env(self):
+        payload = {"a": "b", "FOO1": "BAR1"}
+        headers = {'Content-type': 'application/json'}
+
+        response = requests.post(self.server + f"/env", data=json.dumps(payload),
+                                 headers=headers)
+        body = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(body.get('description'), payload)
+        response = requests.delete(self.server + f"/env", headers=headers)
+        body = response.json()
+
+        self.assertEqual(len(body.get('description')), 0)
         self.assertEqual(body.get("message"), ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)

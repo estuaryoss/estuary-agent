@@ -54,11 +54,20 @@ class EnvTestCase(unittest.TestCase):
         self.assertEqual(env_vars_set, {})
         self.assertGreater(len(env.get_env()), 0)
 
+    def test_virt_env_cleaning(self):
+        env = EnvironmentSingleton.get_instance()
+        env.set_env_vars({"FOO1": "v1"})
+        self.assertGreater(len(env.get_virtual_env()), 0)
+
+        env.clear_virtual_env()
+
+        self.assertEqual(len(env.get_virtual_env()), 0)
+
     def test_maxcap_for_virt_env(self):
         env = EnvironmentSingleton.get_instance()
         env.set_env_vars({"FOO1": "v1"})
         max_cap = EnvironmentSingleton.VIRTUAL_ENV_MAX_SIZE
-        for i in range(0, 2 * EnvironmentSingleton.VIRTUAL_ENV_MAX_SIZE):
+        for i in range(0, 2 * max_cap):
             is_set = env.set_env_var(f"{i}", f"{i}")
         self.assertEqual(is_set, False)
         self.assertEqual(len(env.get_virtual_env()), EnvironmentSingleton.VIRTUAL_ENV_MAX_SIZE)

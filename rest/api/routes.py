@@ -116,6 +116,17 @@ def get_vars():
         mimetype="application/json")
 
 
+@app.route('/env', methods=['DELETE'])
+def delete_virtual_env_vars():
+    env.clear_virtual_env()
+
+    return Response(
+        json.dumps(HttpResponse().response(code=ApiCode.SUCCESS.value,
+                                           message=ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value),
+                                           description=env.get_virtual_env())), 200,
+        mimetype="application/json")
+
+
 @app.route('/ping')
 def ping():
     return Response(

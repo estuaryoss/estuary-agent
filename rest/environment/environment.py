@@ -6,7 +6,7 @@ from rest.api import AppCreatorSingleton
 
 
 class EnvironmentSingleton:
-    VIRTUAL_ENV_MAX_SIZE = 100
+    VIRTUAL_ENV_MAX_SIZE = 500
 
     __file = "environment.properties"
     __instance = None
@@ -73,6 +73,9 @@ class EnvironmentSingleton:
 
     def get_virtual_env(self):
         return self.__virtual_env
+
+    def clear_virtual_env(self):
+        self.__virtual_env.clear()
 
     def get_env_and_virtual_env(self):
         return {**self.__env, **self.__virtual_env}
