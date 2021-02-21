@@ -21,6 +21,7 @@ class FlaskServerTestCase(unittest.TestCase):
     # script_path = "tests/rest/input"
     script_path = "input"
     server = "http://127.0.0.1:8080"
+    service_name = properties.get("name")
 
     def setUp(self):
         requests.delete(self.server + "/commanddetached")
@@ -101,12 +102,11 @@ class FlaskServerTestCase(unittest.TestCase):
         xid = "anaaremere"
         headers = {'X-Request-ID': xid}
         response = requests.get(self.server + "/about", headers=headers)
-        service_name = "estuary-agent"
         body = response.json()
         headers = response.headers
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(body.get('description'), dict)
-        self.assertEqual(body.get('name'), service_name)
+        self.assertEqual(body.get('name'), properties.get("name"))
         self.assertEqual(body.get("message"), ErrorMessage.HTTP_CODE.get(ApiCode.SUCCESS.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.SUCCESS.value)
@@ -117,12 +117,11 @@ class FlaskServerTestCase(unittest.TestCase):
     def test_about_endpoint_unauthorized(self):
         headers = {'Token': "invalidtoken"}
         response = requests.get(self.server + "/about", headers=headers)
-        service_name = "estuary-agent"
         body = response.json()
         headers = response.headers
         self.assertEqual(response.status_code, 401)
         self.assertEqual(body.get('description'), "Invalid Token")
-        self.assertEqual(body.get('name'), service_name)
+        self.assertEqual(body.get('name'), properties.get("name"))
         self.assertEqual(body.get("message"), ErrorMessage.HTTP_CODE.get(ApiCode.UNAUTHORIZED.value))
         self.assertEqual(body.get('version'), properties.get('version'))
         self.assertEqual(body.get('code'), ApiCode.UNAUTHORIZED.value)
@@ -369,6 +368,7 @@ class FlaskServerTestCase(unittest.TestCase):
         self.assertEqual(body.get('description').get('id'), test_id)
         self.assertEqual(body.get('description').get('started'), False)
         self.assertEqual(body.get('description').get('finished'), True)
+        self.assertGreaterEqual(len(body.get('description').get('processes')), 2)
         self.assertNotEqual(body.get('description').get('startedat'), "none")
         self.assertNotEqual(body.get('description').get('finishedat'), "none")
         self.assertNotEqual(body.get('description').get('duration'), "none")
@@ -573,6 +573,12 @@ class FlaskServerTestCase(unittest.TestCase):
         response2 = requests.get(self.server + f"/commanddetached/{test_id2}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response2.status_code, 200)
+        body = response.json()
+        body2 = response2.json()
+        pid = body.get('description').get("pid")
+        pid2 = body2.get('description').get("pid")
+        self.assertNotIn(str(pid), json.dumps(body.get('description').get('processes')))
+        self.assertIn(str(pid2), json.dumps(body.get('description').get('processes')))
 
     def test_command_stop_id_does_not_exist(self):
         test_id = "this_id_does_not_exist"
