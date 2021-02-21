@@ -5,7 +5,7 @@ import psutil
 from rest.utils.io_utils import IOUtils
 
 properties = {
-    "name": "estuary-agent-go",
+    "name": "estuary-agent",
     "version": "4.2.0",
     "description": "Run your shell commands via REST API",
     "author": "Catalin Dinuta",
