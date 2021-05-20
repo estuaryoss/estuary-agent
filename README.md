@@ -103,6 +103,8 @@ Run example:
 ### Authentication
 For auth set HTTP_AUTH_TOKEN env variable.  
 
+[!!!]() Use this env variable, otherwise you will open a major security hole. The attacker will have access to your system. [!!!]()
+
 Run example:
 
     docker run \
